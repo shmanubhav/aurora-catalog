@@ -1,0 +1,8 @@
+     822 data/1872/flags_base_laya.lines
+      68 data/1872/flags_ft_laya.lines
+     143 data/1872/flags_strict.lines
+     146 data/1872/flags_fuzzy.lines
+     933 data/1872/pool.lines
+    2042 data/1872/rg_loose.lines
+    1769 data/1872/net_only.lines
+    5923 total
