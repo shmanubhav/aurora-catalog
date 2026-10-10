@@ -262,3 +262,11 @@ gemma	2026-10-10T17:41:14Z	data/1872/labels/gemma_run.log	0dd77ce9c6ce681a0c6395
 check	start	2026-10-10T17:41:16Z	953e3fc	
 check	2026-10-10T17:41:17Z	data/1872/labels/check.txt	b8660b98d6d6cbb97cab5a9cad5269d20d38475e7ee83d3f8519150a4f7ba5b8	4	4545099
 adjudication_render	start	2026-10-10T17:41:19Z	2b1f6df	
+adjudication_render	2026-10-10T17:41:20Z	data/1872/adjudication/manifest.tsv	02fe92e8ffcabd0af7f0a80ce15ed13080ae1374aec87a9dc5caa776a016b2d4	36	d2c72b5
+adjudication_render	2026-10-10T17:41:20Z	data/1872/adjudication/opus_batches/b001.txt	9e88a285e527dbdb1f7da7c62a8c73a21a3b9bf0b689c1fa09714552c1e21cc5	403	d2c72b5
+adjudication_render	2026-10-10T17:41:20Z	data/1872/adjudication/opus_batches/b002.txt	34808f9b3f063e7851cfa913f148ac09eeb2167e83d82ccc3137b7e58a28d4f4	422	d2c72b5
+adjudication_render	2026-10-10T17:41:20Z	data/1872/adjudication/opus_batches/b003.txt	1c095d7346b845c4c9beb8e7a35db1ac0dd8d7c2db6f73622299ab0457e851d9	134	d2c72b5
+adjudication_render	2026-10-10T17:41:20Z	SB/adjudicator/_prompts/b001.md	5552ccd5d4192ea071bc6221a1b82048858ae867ecc8928fff66ff0cc4515e54	26	d2c72b5
+adjudication_render	2026-10-10T17:41:20Z	SB/adjudicator/_prompts/b002.md	28a0b285b5080c685f91ad5498e2738ebf755ec76995f3b5fe963bfc13c7d1a7	26	d2c72b5
+adjudication_render	2026-10-10T17:41:20Z	SB/adjudicator/_prompts/b003.md	e3858cf9ba50acd577eb1adf509797f90a4c4336ef3c0cd99fdd854113c4fe61	26	d2c72b5
+adjudication_render	2026-10-10T17:41:21Z	SB/adjudicator/_owners.tsv	df5ee896aad3836dc824d879f46d17ed6067b01f7985370716d7e3c9ff83efbc	3	d2c72b5
