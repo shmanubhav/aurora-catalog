@@ -277,3 +277,4 @@ adjudication_collect	start	2026-10-10T17:41:43Z	455b14b
 adjudication_collect	2026-10-10T17:41:44Z	data/1872/adjudication/adjudication_opus.tsv	2afdba35e5b9ec6efa3eb7336b1886f479559d3667097608ef06e765faf5d7a9	35	44ad63b
 adjudication_collect	2026-10-10T17:41:44Z	data/1872/adjudicator_failed_ids.txt	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	0	44ad63b
 score	start	2026-10-10T17:41:46Z	813eecd	
+score	2026-10-10T17:41:48Z	results/1872/results.md	40f68a9da459e70e67515d334ce084f783e181218102ddc2dfa7c2f39b56dd02	31	9188de9
