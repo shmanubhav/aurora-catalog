@@ -1,4 +1,6 @@
-"""Base Laya precision on 1859 by scoring route: short articles (<= 300 tokens, one pass) vs long (max over windows).
+"""Base Laya precision on 1859 by scoring route: short articles (<= 300 tokens, one pass) vs long
+(laya's predict_long route, which reads an article whole when its serialized state fits the room the question leaves;
+see route_subsplit_1859.py).
 Reads 1859 data only. Written and run on 2026-10-10, after the 1872 download, as a diagnostic for the paper.
 
 Usage: python3 -I paper/scripts/route_split_1859.py   (from the repo root; needs the local data/ folder)

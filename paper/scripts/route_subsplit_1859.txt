@@ -1,0 +1,3 @@
+room 464 tokens, window 312, stride 156
+long route, read whole: flags 116, sightings 25, precision 21.6%
+long route, windowed: flags 616, sightings 131, precision 21.3%

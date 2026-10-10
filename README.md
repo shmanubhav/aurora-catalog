@@ -17,9 +17,12 @@ scans.
 - `freeze/` frozen settings, prompts and keyword patterns
 - `bin/` every script; `bin/run_1872.sh STAGE` runs the 1872 test stage by stage on the branch `run-1872` and logs
   each output's hash in `results/1872_stage_log.tsv`
-- `results/` labels, scores and result tables (1859 now, 1872 as the test runs)
+- `results/` result tables, the 1859 adjudications and checker outputs, the 1872 run log and analysis log, and the
+  1859 and 1872 audit samples
+- `data/` the 1859 labels, label-set key, article text, base Laya scores and keyword flags (on `analysis-1872`)
 - `prereg/` the pre-registration and its manifest
-- `paper/` the AI-use ledger, and instructions for the human auditor
+- `paper/` the AI-use ledger and its addendum, the post-download analysis disclosures, the 1859 diagnostic scripts in
+  `paper/scripts/`, and instructions for the human auditor
 
 ## Reproducing
 
@@ -45,7 +48,8 @@ workstation; `/srv` and `/opt` paths are on the GPU host.
 ## Use of AI
 
 Large language models are part of the method (labelers, adjudicator, checkers) and helped write the code and
-documents. Every such use, its validity risk and its mitigation is listed in `paper/ai_use_ledger.md`. The answer key
+documents. Every such use, its validity risk and its mitigation is listed in `paper/ai_use_ledger.md` and its
+addendum `paper/ai_use_ledger_addendum.md`. The answer key
 is LLM-adjudicated and is validated against a human annotator on a stratified sample (independent; if nobody is found
 within 4 weeks the author does it, disclosed; pre-registration section 5).
 

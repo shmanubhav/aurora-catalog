@@ -19,22 +19,24 @@ count. The procedure for them:
 - The 1872 inputs are checked against the hashes the stage log recorded. The 1859 inputs of the 1859 audit are hashed
   into the analysis log; those in the frozen manifest are also checked against it. The fine-tuned checkpoint files are
   checked against hashes recorded on 2026-10-10 (`results/1872/ft_checkpoint_copy.sha256`).
+- Times and inspections marked self-reported rest on the author's own records (git commit times, the run's console
+  log and working notes); GitHub and OSF server times are the independent record.
 
 Record of what happened (dated; filled in as it happens):
 
 - 2026-10-10, about 17:58 UTC: a no-argument call of an early version of the runner created the empty
   `results/1872/analyses/` folder and the header-only analysis log. It printed its usage message; no analysis ran and
   no 1872 output was read.
-- 2026-10-10: referee round 1 returned NO-GO (fixed in 5fb4b3c); round 2 returned NO-GO (fixed in 19f6f21); round 3
+- 2026-10-10: AI referee round 1 returned NO-GO (fixed in 5fb4b3c); round 2 returned NO-GO (fixed in 19f6f21); round 3
   returned NO-GO (fixed in e1d6aa4); round 4 returned GO on e1d6aa4. The reprint, OCR and truncation analyses ran on
   e1d6aa4's code (the OCR and truncation start rows record its log-only descendants 577c674 and 31cea8c; `bin/` and
   `paper/` are unchanged between them).
 - 2026-10-10: the analysis code was first committed (7ce9342, 17:58:57 UTC) after the main 1872 results were
   computed (`results/1872/results.md`, logged 17:41:48 UTC). Both times are self-reported.
 - 2026-10-10: the choices below, including the human-label fallback to a repeat card and the kappa not-estimable
-  rule, were made before any audit page was sent to anyone (the author confirmed this on 2026-10-10), so before any
-  human answer existed. Git commit times are self-reported; the public timestamp is the push of this branch, which
-  comes before any page is sent.
+  rule, were made before any audit page was sent to anyone (self-reported), so before any human answer existed. Git
+  commit times are self-reported; the public timestamp is the push of this branch, which comes before any page is
+  sent.
 
 ## Other dated decisions after the download
 
@@ -43,8 +45,10 @@ Record of what happened (dated; filled in as it happens):
   sample) was committed; the stage output files under `data/1872/` (labels, checker verdicts, adjudication, flags and
   scores) were published as SHA-256 hashes in `results/1872_stage_log.tsv`, not as files. The author decided on
   2026-10-10 to release those files once the human-audit answers are committed, so that the annotator cannot look up
-  the models' answers. This entry is pushed before any audit page is sent. The stage-log hashes let anyone check the
-  released files. The paper lists this as a deviation.
+  the answer key or the checkers' verdicts. Each audited article's stratum, which shows which systems flagged it, is
+  already public in `results/1872/sample_1872.tsv`; on that point the 1872 page, like the 1859 page (pre-registration
+  section 5), is blind by instruction only. This entry is pushed before any audit page is sent. The stage-log hashes
+  let anyone check the released files. The paper lists this as a deviation.
 - **Release of the 1859 labels (deviation; 2026-10-10).** Section 7 of the pre-registration says the 1859 labels are
   public from registration. Of the 1859 label files, only the adjudications, the audit sample and the checker outputs
   were: the labelers' files sit under `data/`, which git ignores. They are committed with this entry and pushed on
@@ -53,7 +57,7 @@ Record of what happened (dated; filled in as it happens):
     American Stories, CC BY 4.0);
   - `data/labels/claude/b001.tsv` to `b078.tsv` (Claude Sonnet);
   - `data/labels/gemma.tsv` (Gemma on the GPU host, the labels used) and `data/labels/gemma_m6_partial.tsv` (the
-    earlier partial Gemma run on the M6, 155 items, not used);
+    earlier partial Gemma run on the author's workstation, 155 items, not used);
   - so that the registered reproduction can be re-run from the repository, the other 1859-only inputs it reads:
     `data/laya_scores.tsv` (base Laya scores), `data/rg_strict.lines` and `data/rg_fuzzy.lines` (keyword flags), and
     `data/adjudication/manifest.tsv` (byte-identical to `results/1859-adjudication-manifest.tsv`).
@@ -62,41 +66,62 @@ Record of what happened (dated; filled in as it happens):
   registered `results/score_1872_repro_1859.md` was computed from these files before registration; re-running the
   command on its second line from a clean checkout of this commit reproduces its table byte for byte. That is an
   aggregate consistency check of the key, label, score and flag files, not proof they are unchanged, and it does not
-  read `items.jsonl` or the M6 partial.
-- **Gemma re-runs.** The first Gemma pass stopped on HTTP 500 from the gateway after 342 of 1,287 items (about
-  15:37 UTC). The resume at 16:17 UTC (stage log, attempt 1) hit HTTP 500 again and was interrupted before writing a
-  label. The 342 first-pass labels, which nobody had looked at at the time of the move (self-reported), were then
-  moved aside by hand, outside
-  `bin/run_1872.sh`, to `data/1872/attempts/gemma.before_attempt2.tsv` (SHA-256
-  `c2c222dd1d8e5e8ee8c6ea0f17a9c56626218c08e4abc8fa52ea9d67cf31f7dd`; this hash was not in the stage log), and a
-  fresh pass from the first item started at 16:20 UTC (attempt 2) and finished without errors. The first-pass file
-  and the other attempt files will be released with the other 1872 outputs; their SHA-256, recorded here because the
-  stage log has none: `gemma_run.attempt1.log` 419f28066b15fc2969cc15db54d0b4dce98278e5e604138dbef92ef86d49f982,
-  `gemma_run.before_attempt1.log` 89b08286047fff21334959f17af4418c8bcba1582bbe7ecde65dd3e43534677b,
-  `gemma_server.attempt1.txt` bb16e3da24873c2faf9fca6076eaf78af02dd0eea94a47f50cf9ccc3c26d1943.
+  read `items.jsonl` or `gemma_m6_partial.tsv`.
+- **Gemma re-runs.** The first Gemma pass stopped on HTTP 500 from the gateway after 342 of 1,287 items (about 15:37
+  UTC). The resume at 16:17 UTC (stage log, attempt 1) hit HTTP 500 again and was stopped at 16:19 UTC, before
+  writing a label. The 342 first-pass labels, whose answers had not been read (self-reported), were then moved by
+  hand, outside `bin/run_1872.sh`, to `data/1872/attempts/gemma.before_attempt2.tsv` (SHA-256
+  `c2c222dd1d8e5e8ee8c6ea0f17a9c56626218c08e4abc8fa52ea9d67cf31f7dd`; this hash was not in the stage log). No server
+  setting was changed between attempts, and the cause of the HTTP 500 errors was not identified. The GPU had been
+  busy at 16:18 UTC, and what it was processing was not recorded. A fresh pass from the first item started at 16:20
+  UTC (attempt 2), after three checks showed the GPU idle (self-reported), and finished without errors. The
+  first-pass file and the other attempt files (two logs and a one-line server-version record, copied by hand) will be
+  released with the other 1872 outputs; their SHA-256, recorded here because the stage log has none:
+  - `gemma_run.attempt1.log` 419f28066b15fc2969cc15db54d0b4dce98278e5e604138dbef92ef86d49f982
+  - `gemma_run.before_attempt1.log` 89b08286047fff21334959f17af4418c8bcba1582bbe7ecde65dd3e43534677b
+  - `gemma_server.attempt1.txt` bb16e3da24873c2faf9fca6076eaf78af02dd0eea94a47f50cf9ccc3c26d1943
 - **Gemma first-pass comparison (2026-10-10, after the run; code run on 1872 outputs after the download, outside the
-  four analyses section 7 allows; a small deviation that touches no hypothesis).** Compared with
-  `awk -F'\t' 'NR==FNR {a[$1]=$2; next} ($1 in a) {n++; if (a[$1]==$2) s++; else d++} END {print length(a), s+0, d+0}' data/1872/attempts/gemma.before_attempt2.tsv data/1872/labels/gemma.tsv`,
-  all 342 labels match the final pass (342 same, 0 different).
-- **What was inspected between the download (07:58 UTC) and the first label (15:14 UTC)** (self-reported, from the run's console log and
-  the author's session transcript): the extraction summary, the per-system flag counts and pool size, H, N and n, the
+  four analyses section 7 allows: a deviation; no hypothesis test uses it).** All 342 first-pass labels match the
+  final pass (it prints `342 342 0`: 342 compared, 342 the same, 0 different). The command:
+
+  ```
+  awk -F'\t' 'NR==FNR {a[$1]=$2; next} ($1 in a) {n++; if (a[$1]==$2) s++; else d++} END {print length(a), s+0, d+0}' data/1872/attempts/gemma.before_attempt2.tsv data/1872/labels/gemma.tsv
+  ```
+
+- **What was inspected between the download (07:58 UTC) and the first label (15:14 UTC)** (self-reported, from the
+  author's own records of the run): the extraction summary, the per-system flag counts and pool size, H, N and n, the
   line and UNPARSED counts of the checker output files, and the checker agents' completion line. No label, verdict,
   score or article text was opened.
 - **GitHub server times.** `results/1872/github_events.tsv` saves GitHub's public event feed for the repository
-  (server times; the feed keeps about 90 days and can omit pushes). It shows the first 1872 push (the download start
-  row) at 07:58:31 UTC, after the OSF registration at 07:51:26 UTC, and the Opus checker's fingerprints pushed at
-  15:14:34 UTC, before the first labeling stage's push at 15:14:36 UTC.
-- **1859 route split.** `paper/scripts/route_split_1859.py` (1859 data only, written and run on 2026-10-10 after the
-  1872 download) gives base Laya's 1859 precision by scoring route, quoted in the paper as development motivation
-  (`paper/scripts/route_split_1859.txt`). It reads no 1872 file, so section 7's limit on code written after the
-  download (which concerns 1872 outputs) does not apply; it is a post-hoc 1859 diagnostic and is labeled as one.
+  (server times; the feed keeps about 90 days and lists only some pushes). The union of two fetches lists 17 of the
+  44 one-commit pushes of `run-1872`; every listed push matches the stage log's commit
+  order and times. It shows the first 1872 push (the download
+  start row) at 07:58:31 UTC, after the OSF registration at 07:51:26 UTC; the Qwen checker's fingerprints at 12:23:51
+  UTC; and the Opus checker's fingerprints at 15:14:34 UTC, before the first labeling stage's push at 15:14:36 UTC.
+- **1859 route split (development motivation; its reading was later corrected).** On 2026-10-09, in development,
+  base Laya's 1859 precision was split ad hoc by scoring route: 58.5% for articles of 300 tokens or fewer, 21.3% for
+  longer ones, which go to laya 0.4.1's `predict_long`. It was read then as the max-over-windows drift Laya's
+  documentation warns about, and it was part of the recorded reason for fine-tuning the multilingual model (whole
+  articles, no windowing).
+  `paper/scripts/route_split_1859.py` recomputed it on 2026-10-10 (`route_split_1859.txt`). An AI review (Claude Opus)
+  then pointed out that `predict_long` reads an article whole when its serialized state (the article wrapped as laya
+  scores it) fits the room the question leaves (464 tokens here), and `paper/scripts/route_subsplit_1859.py`, written
+  and run on 2026-10-10 with laya's own `window_budget`,
+  splits the long route: read whole 21.6% (25 of 116), windowed 21.3% (131 of 616) (`route_subsplit_1859.txt`). So
+  windowing does not explain the gap; this split cannot tell article length apart from the short route's batched
+  scoring. The paper reports the split only as the motivation recorded at the time, with this correction, not as
+  evidence. Both scripts read 1859 data only, so
+  section 7's limit on code written after the download (which concerns 1872 outputs) does not apply. The
+  base-Laya scoring ran as registered ("as in 1859"); only its description was imprecise: the pre-registration
+  (section 3) and the frozen configs (`freeze/config.json`, `freeze/config_1872.json`) describe the long route as
+  scored in windows, but long-route articles whose serialized state fits 464 tokens were read in one pass.
 
 ## Choices where the registration left room
 
 1. **Reprint groups.**
    - Shingle frequencies are counted over all labeled items, which is the registration's literal "over the labeled
-     items". Union-find never joins pool and net. On 1859, counting within each part gives the same partition (referee
-     check).
+     items". Union-find never joins pool and net. On 1859, counting within each part gives the same partition (AI
+     referee check).
    - Shingles are kept as strings, not as Python's per-process string hash: the same sets barring a hash collision.
    - A net group weighs H/n (one net weight); a pool group weighs 1.
 2. **Group-level H1.**
@@ -140,11 +165,11 @@ Record of what happened (dated; filled in as it happens):
 ## Known weakness of the registered audit correction
 
 The audit-corrected recall is very sensitive to annotator error on items the LLM key calls NO. Each audited stratum's
-p0 (the share of LLM-NO items the human calls YES) is applied to every LLM-NO item in that stratum, and the base-Laya-only
-stratum and the loose-net stratum (weight H/n) hold most of the labeled items. A few human false alarms there therefore
-add many phantom sightings to the denominator, and they look exactly like LLM misses. In a simulation the referee ran
-on the 1859 sample (not committed; to be redone with a committed script before the paper quotes a number), flipping 8%
-of answers at random moved fine-tuned Laya's recall from 87.0% (LLM key) to 53.7% (audit-corrected). This comes from
-the registered estimator, not from the code. The paper reports the corrected numbers
-as a sensitivity analysis next to the test-retest agreement on the hidden repeats, which measures the annotator's own
-consistency. As registered, the LLM key decides H1.
+p0 (the share of LLM-NO items the human calls YES) is applied to every LLM-NO item in that stratum, and the
+base-Laya-only stratum and the loose-net stratum (weight H/n) hold most of the labeled items. A few human false alarms
+there therefore add many phantom sightings to the denominator, and they look exactly like LLM misses. In a simulation
+the AI referee ran on the 1859 sample (not committed; to be redone with a committed script before the paper quotes a
+number), flipping 8% of answers at random moved fine-tuned Laya's recall from 87.0% (LLM key) to 53.7%
+(audit-corrected). This comes from the registered estimator, not from the code. The paper reports the corrected
+numbers as a sensitivity analysis next to the test-retest agreement on the hidden repeats, which measures the
+annotator's own consistency. As registered, the LLM key decides H1.
