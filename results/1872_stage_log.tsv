@@ -28,3 +28,4 @@ checker_inputs	2026-10-10T12:18:06Z	data/1872/checker/items.jsonl	8155a940a858ed
 qwen	start	2026-10-10T12:18:08Z	219b290	
 qwen	2026-10-10T12:23:50Z	data/1872/checker/qwen_server.txt	59b5d140fee27a4c019670e91fb8bbe11ff16a83f477209f7df99753fdc15b24	1	ef45eae
 qwen	2026-10-10T12:23:50Z	data/1872/checker/qwen.tsv	ff88032a518182f94c7a02aa97059960bfc64a7a676ccf1437b57a240394d845	68	ef45eae
+opus_checker_render	start	2026-10-10T15:14:06Z	e7535bc	
