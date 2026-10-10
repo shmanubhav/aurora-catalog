@@ -183,3 +183,4 @@ label_render	2026-10-10T15:14:38Z	SB/labeler/_owners.tsv	de7442bd2462fe7dacfceb1
 label_run	start	2026-10-10T15:14:41Z	40b5cdb	
 label_run	2026-10-10T15:15:56Z	SB/labeler/agents.tsv	e7cd9ec337584ac1c1e7d623fc03735838222b1790ab11fea8295bd7c07aea13	68	f45c0c9
 label_run	2026-10-10T15:15:56Z	SB/labeler/_verified.tsv	ce8a708ac7859251b83d647bd229aaee8c82a22334cd64ff0f6c42e3a8351723	68	f45c0c9
+label_collect	start	2026-10-10T15:15:59Z	71a1e7c	
