@@ -279,3 +279,8 @@ adjudication_collect	2026-10-10T17:41:44Z	data/1872/adjudicator_failed_ids.txt	e
 score	start	2026-10-10T17:41:46Z	813eecd	
 score	2026-10-10T17:41:48Z	results/1872/results.md	40f68a9da459e70e67515d334ce084f783e181218102ddc2dfa7c2f39b56dd02	31	9188de9
 audit	start	2026-10-10T17:41:50Z	9589fb1	
+audit	2026-10-10T17:41:51Z	data/1872/audit/sample_1872.tsv	bccaedaea95bef2dc70d6fc67259f23572a3749012d48e9e7e2aa9cc57a773a2	251	b5fab32
+audit	2026-10-10T17:41:51Z	data/1872/audit/page_1872/audit.html	57cd3d3e167a66c4debbc6adcdf1fe9872cf3e68478726aa35de94f24012e015	337	b5fab32
+audit	2026-10-10T17:41:51Z	data/1872/audit/page_1872/audit_key.tsv	40dbeed3fb33842e6dfd36f30cbf7cdea4b0b63c44e3c5c8f52558919c016d6c	261	b5fab32
+audit	2026-10-10T17:41:51Z	data/1872/audit/page_1859/audit.html	5a1c6987f330a5ef59f941f5e1d7d057d9f9e3edeff3eec3bcb95381cbba6174	187	b5fab32
+audit	2026-10-10T17:41:51Z	data/1872/audit/page_1859/audit_key.tsv	619f470805a262946b3fe104a9c69a99a4364bcb7843b893252b4d9203042dfc	111	b5fab32
