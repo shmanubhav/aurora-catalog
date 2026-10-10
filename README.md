@@ -34,6 +34,11 @@ Order for the 1872 test: the registered commit is pushed and cited on OSF first;
 and run the stages in order, starting with `bin/run_1872.sh download`. Stages commit and push only `run-1872`, so the
 registered commit never changes.
 
+Post-download analyses (pre-registration section 7: reprint groups, OCR terciles, truncation count, human audit) are
+written after the run, checked by `bin/test_analyses_1872.sh` on 1859 data and toy cases only, and committed and pushed
+before they touch any 1872 output. Each then runs once through `bin/run_analyses_1872.sh`, which checks every input
+against the stage log and records the hashes in `results/1872/analysis_log.tsv`.
+
 Freeze records mention the author's machines: `llm02` is the GPU host (AMD RX 7900 XTX), `M6` the Apple-silicon
 workstation; `/srv` and `/opt` paths are on the GPU host.
 
