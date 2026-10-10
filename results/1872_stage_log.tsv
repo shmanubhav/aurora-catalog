@@ -26,3 +26,5 @@ labelset	2026-10-10T12:18:02Z	data/1872/labelset_draw.txt	e24ef9d787940a2fcdac0e
 checker_inputs	start	2026-10-10T12:18:04Z	3d8b0b4	
 checker_inputs	2026-10-10T12:18:06Z	data/1872/checker/items.jsonl	8155a940a858ed2087f5c6b8b0ccb3a9db3410bcf9ef311f15c56a7a74b59734	68	90046c2
 qwen	start	2026-10-10T12:18:08Z	219b290	
+qwen	2026-10-10T12:23:50Z	data/1872/checker/qwen_server.txt	59b5d140fee27a4c019670e91fb8bbe11ff16a83f477209f7df99753fdc15b24	1	ef45eae
+qwen	2026-10-10T12:23:50Z	data/1872/checker/qwen.tsv	ff88032a518182f94c7a02aa97059960bfc64a7a676ccf1437b57a240394d845	68	ef45eae
