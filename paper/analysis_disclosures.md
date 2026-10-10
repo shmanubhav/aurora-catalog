@@ -26,11 +26,59 @@ Record of what happened (dated; filled in as it happens):
   `results/1872/analyses/` folder and the header-only analysis log. It printed its usage message; no analysis ran and
   no 1872 output was read.
 - 2026-10-10: referee round 1 returned NO-GO (fixed in 5fb4b3c); round 2 returned NO-GO (fixed in 19f6f21); round 3
-  returned NO-GO (fixed in the next commit).
+  returned NO-GO (fixed in e1d6aa4); round 4 returned GO on e1d6aa4, the pushed commit the reprint, OCR and
+  truncation analyses ran on.
+- The analysis code was written after the main 1872 results were computed: `results/1872/results.md` was logged at
+  17:41:48 UTC and the first analysis commit (7ce9342) is from 17:58 UTC, both on 2026-10-10 (self-reported times).
 - 2026-10-10: the choices below, including the human-label fallback to a repeat card and the kappa not-estimable
   rule, were made before any audit page was sent to anyone (the author confirmed this on 2026-10-10), so before any
   human answer existed. Git commit times are self-reported; the public timestamp is the push of this branch, which
   comes before any page is sent.
+
+## Other dated decisions after the download
+
+- **Release of the 1872 outputs (deviation).** Section 7 of the pre-registration says 1872 outputs are added on
+  `run-1872` as each stage completes. Only `results/1872/` (summary results, the label-set key and the audit
+  sample) was committed; the stage output files under `data/1872/` (labels, checker verdicts, adjudication, flags and
+  scores) were published as SHA-256 hashes in `results/1872_stage_log.tsv`, not as files. The author decided on
+  2026-10-10 to release those files once the human-audit answers are committed, so that the annotator cannot look up
+  the models' answers. This entry is pushed before any audit page is sent. The stage-log hashes let anyone check the
+  released files. The paper lists this as a deviation.
+- **Release of the 1859 labels (deviation).** Section 7 of the pre-registration says the 1859 labels are public from
+  registration. Only the 1859 adjudications, the 1859 audit sample and the 1859 checker outputs were: the labeler
+  files sit under `data/`, which git ignores. They are published in the commit that adds this entry, on 2026-10-10,
+  at the paths the code reads:
+  - `data/labelset/key.tsv` (id, window line, stratum, weight) and `data/labelset/items.jsonl` (the article text, from
+    American Stories, CC BY 4.0);
+  - `data/labels/claude/b001.tsv` to `b078.tsv` (Claude Sonnet);
+  - `data/labels/gemma.tsv` (Gemma on the GPU host, the labels used) and `data/labels/gemma_m6_partial.tsv` (the
+    earlier partial Gemma run on the M6, 155 items, not used).
+
+  They were not fingerprinted at registration, so this release cannot be checked against a registered hash. The
+  registered `results/score_1872_repro_1859.md` was computed from these files before registration, and recomputing
+  it from them (its command is in its first line) checks them against every number it prints.
+- **Gemma re-runs.** The first Gemma pass stopped on HTTP 500 from the gateway after 342 of 1,287 items (about
+  15:37 UTC). The resume at 16:17 UTC (stage log, attempt 1) hit HTTP 500 again and was interrupted before writing a
+  label. The 342 first-pass labels, which nobody had looked at, were then moved aside by hand, outside
+  `bin/run_1872.sh`, to `data/1872/attempts/gemma.before_attempt2.tsv` (SHA-256
+  `c2c222dd1d8e5e8ee8c6ea0f17a9c56626218c08e4abc8fa52ea9d67cf31f7dd`; this hash was not in the stage log), and a
+  fresh pass from the first item started at 16:20 UTC (attempt 2) and finished without errors. The first-pass file
+  will be released with the other 1872 outputs.
+- **Gemma first-pass comparison (code run on 1872 outputs after the download, outside the four analyses section 7
+  allows; a small deviation that touches no hypothesis).** Compared after the run with
+  `awk -F'\t' 'NR==FNR {a[$1]=$2; next} ($1 in a) {n++; if (a[$1]==$2) s++; else d++} END {print length(a), s+0, d+0}' data/1872/attempts/gemma.before_attempt2.tsv data/1872/labels/gemma.tsv`,
+  all 342 labels match the final pass (342 same, 0 different).
+- **What was inspected between the download and the first label** (self-reported, from the run's console log and
+  the author's session transcript): the extraction summary, the per-system flag counts and pool size, H, N and n, the
+  line and UNPARSED counts of the checker output files, and the checker agents' completion line. No label, verdict,
+  score or article text was opened.
+- **GitHub server times.** `results/1872/github_events.tsv` saves GitHub's public event feed for the repository
+  (server times; the feed keeps about 90 days and can omit pushes). It shows the first 1872 push (the download start
+  row) at 07:58:31 UTC, after the OSF registration at 07:51:26 UTC, and the Opus checker's fingerprints pushed at
+  15:14:34 UTC, before the first labeling stage's push at 15:14:36 UTC.
+- **1859 route split.** `paper/scripts/route_split_1859.py` (1859 data only, written and run on 2026-10-10 after the
+  1872 download) gives base Laya's 1859 precision by scoring route, quoted in the paper as development motivation
+  (`paper/scripts/route_split_1859.txt`).
 
 ## Choices where the registration left room
 

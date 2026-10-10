@@ -1,0 +1,2 @@
+batch: flags 195, labeled 195, sightings 114, precision 58.5%
+long: flags 732, labeled 732, sightings 156, precision 21.3%
