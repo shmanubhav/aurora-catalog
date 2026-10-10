@@ -274,3 +274,5 @@ adjudication_run	start	2026-10-10T17:41:23Z	344bce2
 adjudication_run	2026-10-10T17:41:41Z	SB/adjudicator/agents.tsv	bb9e8c01792e07b660aabd948267b1cd35a908655e89f80474f6a21b97c850cb	3	e9f6581
 adjudication_run	2026-10-10T17:41:41Z	SB/adjudicator/_verified.tsv	188c287c751d52f425056d974a7d10992ef5d26051e7c60e89c85d6a587200a1	3	e9f6581
 adjudication_collect	start	2026-10-10T17:41:43Z	455b14b	
+adjudication_collect	2026-10-10T17:41:44Z	data/1872/adjudication/adjudication_opus.tsv	2afdba35e5b9ec6efa3eb7336b1886f479559d3667097608ef06e765faf5d7a9	35	44ad63b
+adjudication_collect	2026-10-10T17:41:44Z	data/1872/adjudicator_failed_ids.txt	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	0	44ad63b
