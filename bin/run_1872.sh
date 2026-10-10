@@ -38,7 +38,7 @@ CLAUDE_VERSION=2.1.296
 SONNET=claude-sonnet-5-5
 OPUS=claude-opus-5-5
 RUN_BRANCH=run-1872
-PUBLIC_ROOT_SHA=not-yet-set   # the public root commit, set in the commit after it (a commit cannot name itself)
+PUBLIC_ROOT_SHA=cfe81037c2410d57402ab150ef2e4f983a6aeba7   # the public root commit (recorded in the commit after it)
 MAX_STAGE_RUNS=3
 export DISABLE_AUTOUPDATER=1
 mkdir -p "$D" results/1872
