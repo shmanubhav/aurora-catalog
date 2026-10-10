@@ -39,18 +39,22 @@ questions = json.load(open(a.config))["laya_questions"]
 ids = list(questions)
 internal = {q: la.Agent._to_internal(questions[q]) for q in ids}
 
-total, cut, longest = 0, [], 0
+total, cut, longest, over, room = 0, [], 0, 0, None
 for row in map(json.loads, open(a.inp)):
     items = la.Agent._encode_state(enc, {"body": row["state"]}, ids, internal, max_len=a.max_len)
     stats = [it["state_stats"] for it in items]
     total += 1
     longest = max(longest, stats[0]["state_tokens"])
+    over += stats[0]["state_tokens"] > a.max_len
     dropped = max(s["state_tokens_dropped"] for s in stats)
     if dropped:
         cut.append((row["line"], stats[0]["state_tokens"], dropped))
+        room = min(s["state_tokens_used"] for s in stats)
 
+# The question header and separators take part of max_len, so the model cuts articles somewhat shorter than max_len.
 out = [f"# Fine-tuned Laya truncation count (max_len {a.max_len}, head_max_len {enc.cfg.get('head_max_len', 192)})\n",
-       f"Articles scored: {total}. Truncated (any state token dropped): {len(cut)}. Longest article: {longest} tokens.\n"]
+       f"Articles scored: {total}. Truncated (any state token dropped): {len(cut)}. Longer than {a.max_len} tokens: "
+       f"{over}. Longest article: {longest} tokens." + (f" Room left for the article: {room} tokens." if room is not None else "") + "\n"]
 out += [f"- line {n}: {t} tokens, {d} dropped" for n, t, d in cut]
 open(a.out, "w").write("\n".join(out) + "\n")
 print("\n".join(out[:2]))

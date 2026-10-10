@@ -36,10 +36,26 @@ record() {   # record ANALYSIS FILE...
   local a=$1; shift
   for f in "$@"; do printf '%s\t%s\t%s\t%s\t%s\n' "$a" "$(date -u +%FT%TZ)" "$f" "$(sha "$f")" "${REASON:-}" >> "$LOG"; done
 }
-fresh() {   # fresh OUTPUT: refuse to overwrite without a reason
-  [ ! -e "$1" ] || [ -n "${REASON:-}" ] || { echo "$1 exists; set REASON=... to run again"; exit 1; }
+fresh() {   # fresh OUTPUT: a re-run needs a reason and keeps the earlier output beside it
+  [ -e "$1" ] || return 0
+  [ -n "${REASON:-}" ] || { echo "$1 exists; set REASON=... to run again"; exit 1; }
+  mv "$1" "$1.before-$(date -u +%Y%m%dT%H%M%SZ)"
 }
+frozen() {   # each FILE must match its prereg/MANIFEST.tsv hash
+  for f in "$@"; do
+    [ "$(awk -F'\t' -v p="$f" '$1 == p {print $2}' prereg/MANIFEST.tsv)" = "$(sha "$f")" ] || { echo "$f differs from prereg/MANIFEST.tsv"; exit 1; }
+  done
+}
+answers() {   # answers SET FILE: the page's own download, committed and pushed before it is scored
+  [ "$(basename "$2")" = "audit_answers_$1.tsv" ] || { echo "$2: expected the $1 page's download, audit_answers_$1.tsv"; exit 1; }
+  git ls-files --error-unmatch "$2" > /dev/null 2>&1 && git diff --quiet HEAD -- "$2" || { echo "commit $2 first"; exit 1; }
+}
+# The analysis code must be exactly the committed, pushed version listed in results/1872/analysis_scripts.sha256.
 [ "$(git rev-parse --abbrev-ref HEAD)" != main ] || { echo "not on main"; exit 1; }
+shasum -a 256 -c --status results/1872/analysis_scripts.sha256 || { echo "scripts differ from results/1872/analysis_scripts.sha256"; exit 1; }
+[ -z "$(git status --porcelain -- bin results/1872/analysis_scripts.sha256)" ] || { echo "uncommitted changes under bin/"; exit 1; }
+frozen bin/agent_outputs.py
+git merge-base --is-ancestor HEAD '@{u}' 2> /dev/null || { echo "push this commit first: the push is the public timestamp"; exit 1; }
 mkdir -p "$OUT"
 [ -f "$LOG" ] || printf 'analysis\tutc\tfile\tsha256\treason\n' > "$LOG"
 SCRIPTS=(bin/holdout_data.py bin/agent_outputs.py bin/run_analyses_1872.sh)
@@ -65,6 +81,7 @@ truncation)
     $FT/tokenizer/tokenizer.json $FT/tokenizer/tokenizer_config.json $D/ft_input.jsonl $OUT/truncation.md ;;
 audit1872)
   [ -f "${2:-}" ] || { echo "usage: $0 audit1872 ANSWERS.tsv"; exit 1; }
+  answers 1872 "$2"
   fresh $OUT/audit_1872.md
   logged "${INPUTS[@]}" $D/audit/sample_1872.tsv $D/audit/page_1872/audit_key.tsv
   python3 -I bin/audit_1872.py storm $D $D/audit/sample_1872.tsv $D/audit/page_1872/audit_key.tsv "$2" $OUT/audit_1872.md \
@@ -74,11 +91,14 @@ audit1872)
     $D/audit/page_1872/audit_key.tsv "$2" $OUT/audit_1872.md ;;
 audit1859)
   [ -f "${2:-}" ] || { echo "usage: $0 audit1859 ANSWERS.tsv"; exit 1; }
+  answers 1859 "$2"
   fresh $OUT/audit_1859.md
   logged $D/audit/page_1859/audit_key.tsv
+  frozen results/audit/sample_1859.tsv results/1859-adjudication-opus.tsv
   python3 -I bin/audit_1872.py balanced data results/audit/sample_1859.tsv $D/audit/page_1859/audit_key.tsv "$2" \
     $OUT/audit_1859.md --adjudication results/1859-adjudication-opus.tsv --seed 1872
-  record audit1859 "${SCRIPTS[@]}" bin/audit_1872.py data/labelset/key.tsv results/1859-adjudication-opus.tsv \
+  record audit1859 "${SCRIPTS[@]}" bin/audit_1872.py data/labelset/key.tsv data/labels/claude/b*.tsv \
+    data/labels/gemma.tsv data/adjudication/manifest.tsv results/1859-adjudication-opus.tsv \
     results/audit/sample_1859.tsv $D/audit/page_1859/audit_key.tsv "$2" $OUT/audit_1859.md ;;
 *)
   echo "usage: $0 reprints | ocr | truncation | audit1872 ANSWERS.tsv | audit1859 ANSWERS.tsv"; exit 1 ;;

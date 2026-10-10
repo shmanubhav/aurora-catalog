@@ -132,8 +132,9 @@ for c, (p1, p2) in contrasts.items():
 p, r = point[a.h1]
 missed = [row for row in rows if row[4] and row[5][a.h1] and not row[5][a.strict]]   # articles, on the LLM key
 k = len({gid[row[0]] for row in missed})
-w(f"- H1 ({a.h1}) at group level: precision {p:.1%}, weighted recall {r:.1%}; the {len(missed)} final-YES articles it "
-  f"flags that strict missed fall in {k} distinct reprint groups -> {'PASS' if p >= 0.80 and r >= 0.80 and k >= 1 else 'FAIL'} "
-  f"(point estimates; sensitivity only, the article-level H1 decides)")
+k_group = sum(1 for g in groups if g[3] and g[4][a.h1] and not g[4][a.strict])
+w(f"- H1 ({a.h1}) at group level: precision {p:.1%}, weighted recall {r:.1%} (bar: both >= 80%); the {len(missed)} "
+  f"final-YES articles it flags that strict missed fall in {k} distinct reprint groups; final-YES groups it flags with "
+  f"no strict-matched member: {k_group} (point estimates; sensitivity only, the article-level H1 decides)")
 open(a.out, "w").write("\n".join(out) + "\n")
 print("\n".join(out))
