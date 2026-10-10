@@ -254,3 +254,4 @@ label_collect	2026-10-10T15:16:01Z	data/1872/labels/claude/b067.tsv	314352388bb9
 label_collect	2026-10-10T15:16:01Z	data/1872/labels/claude/b068.tsv	7cf3fd39b6e4ae9fad87ae2aa22cc20a0620f60693621f4126b09003edc97cdd	15	9ccb06d
 label_collect	2026-10-10T15:16:01Z	data/1872/labeler_failed_ids.txt	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	0	9ccb06d
 gemma	start	2026-10-10T15:16:03Z	619f136	
+gemma	rerun	2026-10-10T16:17:28Z	6baea84	attempt 1: label_gemma.py stopped on HTTP 500 from the LLM gateway after 342 of 1287 items (about 15:37Z); the stuck drain was interrupted at 16:17Z; resume keeps the 342 written labels; error log kept as data/1872/attempts/gemma_run.before_attempt1.log
