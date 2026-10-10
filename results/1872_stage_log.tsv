@@ -259,3 +259,4 @@ gemma	rerun	2026-10-10T16:20:24Z	b7125a6	attempt 2: fresh uninterrupted Gemma pa
 gemma	2026-10-10T17:41:14Z	data/1872/labels/gemma_server.txt	238d50042e8bb976b0bbc590a3477614639c4df34cf4f7eca5c3961d6e8602c7	1	3c6bade
 gemma	2026-10-10T17:41:14Z	data/1872/labels/gemma.tsv	64042451d871b5c9a897632c3729bb26662f784df3a3f1f251d842f817031694	1287	3c6bade
 gemma	2026-10-10T17:41:14Z	data/1872/labels/gemma_run.log	0dd77ce9c6ce681a0c6395d0eae2d329cc3d7eb48995777d76a6d5969641f4bc	52	3c6bade
+check	start	2026-10-10T17:41:16Z	953e3fc	
