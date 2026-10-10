@@ -170,3 +170,11 @@ ocr	2026-10-10T19:11:31Z	data/1872/checker/opus.tsv	65af8d327068a2a82e0879cbe137
 ocr	2026-10-10T19:11:31Z	data/1872/window.txt	db32d92724d645320f7e99b347880607d68ea5ff9aa234406908ed7c7408b1fe	
 ocr	2026-10-10T19:11:31Z	results/1872/analyses/ocr_terciles.md	b6cda53db10e08426c7cc8bca24589fd19785e55c38f91729d7b1a874cc999c9	
 truncation	2026-10-10T19:11:35Z	start	31cea8c6a1be8ba8e7512cd280aacda2c3111ed4	
+truncation	2026-10-10T19:12:13Z	bin/run_analyses_1872.sh	bf855592f93c80a66f81ce325792f31a1f4f3dace9c38f083a3b41333020ec88	
+truncation	2026-10-10T19:12:13Z	bin/truncation_1872.py	063f7a25636e3c9e15aa4edb27ebeb79f537ce2f51a7e3bc7fa9cb5e98be039c	
+truncation	2026-10-10T19:12:13Z	data/ft_checkpoint_copy/ft_config.json	e3238ee4b9d5e0378b0ab533cb3660c69af80ffa35f00d4155b519605c83a57e	
+truncation	2026-10-10T19:12:13Z	data/ft_checkpoint_copy/rl_agent_config.json	afd200541042bfdd51a6da4821e554b71fb58999a4ece9ef7bb1adf435eb0079	
+truncation	2026-10-10T19:12:13Z	data/ft_checkpoint_copy/tokenizer/tokenizer.json	dbba919c6e5e492bc22beb80abb64e6fcc7e8744dc696e8388b8c977767afa4b	
+truncation	2026-10-10T19:12:13Z	data/ft_checkpoint_copy/tokenizer/tokenizer_config.json	e8e6a37c189f9dd23976b86b3e1ddb6928472e9f87c94103a1aaff311f45f090	
+truncation	2026-10-10T19:12:14Z	data/1872/ft_input.jsonl	03172c85af4ab470c7a5d8923e6e0055b9ef047506e15efb0095e718df54234a	
+truncation	2026-10-10T19:12:14Z	results/1872/analyses/truncation.md	c44959fd7980dae4c22d12461ea48528379c0ecf1861681a3950ae8273dd1975	
