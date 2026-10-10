@@ -24,3 +24,4 @@ labelset	2026-10-10T12:18:02Z	data/1872/labelset/key.tsv	9899d20660415cf13628dff
 labelset	2026-10-10T12:18:02Z	data/1872/labelset/items.jsonl	a7d6ffd61fa346ca8d5a8c02a1469bb68a1dc01b25400f9b1b7ca504fc343464	1287	b332602
 labelset	2026-10-10T12:18:02Z	data/1872/labelset_draw.txt	e24ef9d787940a2fcdac0e253570f20a77b316cf49e2454709df84eca3513fe5	2	b332602
 checker_inputs	start	2026-10-10T12:18:04Z	3d8b0b4	
+checker_inputs	2026-10-10T12:18:06Z	data/1872/checker/items.jsonl	8155a940a858ed2087f5c6b8b0ccb3a9db3410bcf9ef311f15c56a7a74b59734	68	90046c2
