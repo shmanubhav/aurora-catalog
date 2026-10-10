@@ -181,3 +181,5 @@ label_render	2026-10-10T15:14:38Z	SB/labeler/_prompts/b067.md	99bfdea1fdbddea399
 label_render	2026-10-10T15:14:38Z	SB/labeler/_prompts/b068.md	0ed7be8de9640c33f44ec908be7ac47f112e21c77a9cddad40b02911d59e0102	30	308a4ae
 label_render	2026-10-10T15:14:38Z	SB/labeler/_owners.tsv	de7442bd2462fe7dacfceb1b14b4aa256360c6fa1d6822d0036f1daa935d7cf1	68	308a4ae
 label_run	start	2026-10-10T15:14:41Z	40b5cdb	
+label_run	2026-10-10T15:15:56Z	SB/labeler/agents.tsv	e7cd9ec337584ac1c1e7d623fc03735838222b1790ab11fea8295bd7c07aea13	68	f45c0c9
+label_run	2026-10-10T15:15:56Z	SB/labeler/_verified.tsv	ce8a708ac7859251b83d647bd229aaee8c82a22334cd64ff0f6c42e3a8351723	68	f45c0c9
