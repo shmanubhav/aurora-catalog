@@ -10,21 +10,27 @@ count. The procedure for them:
 - An adversarial AI referee (Claude Opus) reviews each version until it returns GO.
 - The code is committed and pushed, with its hashes in `results/1872/analysis_scripts.sha256`, before it reads any
   1872 output. `bin/run_analyses_1872.sh` refuses to run otherwise.
-- Every run of an analysis first commits and pushes a start row to `results/1872/analysis_log.tsv`. It then logs the
-  hashes of the scripts, inputs and output, or a failed row. Every attempt, including failed ones and any re-run
-  (which needs a stated reason and keeps the earlier output), is on the public record.
+- Every run of an analysis first commits and pushes a start row to `results/1872/analysis_log.tsv`, before it reads
+  any 1872 file. It then logs the hashes of the scripts, inputs and output, or a failed row. Every attempt that gets
+  that far, failed ones included, is on the public record. Any repeat of an analysis, after a failure too, needs a
+  stated reason, and an earlier output is kept beside the new one. Refusals before the start row (wrong branch, code
+  not committed and pushed, something else staged, a misnamed or uncommitted answers file) read no data and are not
+  logged.
 - The 1872 inputs are checked against the hashes the stage log recorded. The 1859 inputs of the 1859 audit are hashed
   into the analysis log; those in the frozen manifest are also checked against it. The fine-tuned checkpoint files are
   checked against hashes recorded on 2026-10-10 (`results/1872/ft_checkpoint_copy.sha256`).
 
 Record of what happened (dated; filled in as it happens):
 
-- 2026-10-10, about 13:58 local time: a no-argument call of an early version of the runner created the empty
+- 2026-10-10, about 17:58 UTC: a no-argument call of an early version of the runner created the empty
   `results/1872/analyses/` folder and the header-only analysis log. It printed its usage message; no analysis ran and
   no 1872 output was read.
-- 2026-10-10: referee round 1 returned NO-GO (fixed in 5fb4b3c); round 2 returned NO-GO (fixed in the next commit).
+- 2026-10-10: referee round 1 returned NO-GO (fixed in 5fb4b3c); round 2 returned NO-GO (fixed in 19f6f21); round 3
+  returned NO-GO (fixed in the next commit).
 - 2026-10-10: the choices below, including the human-label fallback to a repeat card and the kappa not-estimable
-  rule, were committed before any audit page was sent to an annotator, so before any human answer existed.
+  rule, were made before any audit page was sent to anyone (the author confirmed this on 2026-10-10), so before any
+  human answer existed. Git commit times are self-reported; the public timestamp is the push of this branch, which
+  comes before any page is sent.
 
 ## Choices where the registration left room
 
@@ -62,7 +68,8 @@ Record of what happened (dated; filled in as it happens):
      not estimable when a rater gave a single label, because it would read 0 by construction; resamples where it is
      not estimable are left out of its interval, and their number is shown.
    - Positive and negative agreement are reported as computed. When one rater never said YES in a stratum, positive
-     agreement is 0%, the same degenerate case in which kappa is marked not estimable.
+     agreement is 0% (or not estimable if neither rater said YES), the same degenerate case in which kappa is marked
+     not estimable; negative agreement likewise.
    - For 1859, whose strata are defined by the LLM label, a pooled unweighted kappa is added.
    - The corrected intervals cover audit sampling only; the labeled set is not resampled.
    - The registration's not-estimable rule is applied within each resample: a resample in which a stratum has no

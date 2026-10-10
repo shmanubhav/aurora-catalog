@@ -3,9 +3,11 @@
 # Usage: bin/run_analyses_1872.sh reprints | ocr | truncation | audit1872 ANSWERS.tsv | audit1859 ANSWERS.tsv
 # Refuses unless the analysis code is exactly the committed, pushed version in results/1872/analysis_scripts.sha256 and
 # every 1872 input still has the hash results/1872_stage_log.tsv last logged for it (the analyses are pure functions of
-# committed stage outputs). Each run first commits and pushes a start row to results/1872/analysis_log.tsv, then the
-# SHA-256 of its scripts, inputs and output, or a failed row; so every attempt, failed ones included, is on the public
-# record. An analysis whose output exists runs again only with REASON="...", and the earlier output is kept beside it.
+# committed stage outputs). Each run first commits and pushes a start row to results/1872/analysis_log.tsv, before it
+# reads any 1872 file, then the SHA-256 of its scripts, inputs and output, or a failed row; so every attempt, failed
+# ones included, is on the public record. Any repeat of an analysis needs REASON="...", and an earlier output is kept
+# beside the new one. Refusals before the start row (wrong branch, code not committed and pushed, something staged,
+# a misnamed or uncommitted answers file) read no data and are not logged.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 D=data/1872
@@ -33,13 +35,17 @@ sha() { shasum -a 256 "$1" | cut -d' ' -f1; }
 logged() {   # each FILE must match the last hash the stage log recorded for it
   for f in "$@"; do
     want=$(awk -F'\t' -v p="$f" '$3 == p {h = $4} END {print h}' "$STAGES")
-    [ -n "$want" ] && [ "$(sha "$f")" = "$want" ] || { echo "$f does not match the stage log"; exit 1; }
+    [ -n "$want" ] && [ "$(sha "$f")" = "$want" ] || { echo "$f does not match the stage log"; return 1; }
   done
 }
 frozen() {   # each FILE must match its prereg/MANIFEST.tsv hash
   for f in "$@"; do
-    [ "$(awk -F'\t' -v p="$f" '$1 == p {print $2}' prereg/MANIFEST.tsv)" = "$(sha "$f")" ] || { echo "$f differs from prereg/MANIFEST.tsv"; exit 1; }
+    [ "$(awk -F'\t' -v p="$f" '$1 == p {print $2}' prereg/MANIFEST.tsv)" = "$(sha "$f")" ] || { echo "$f differs from prereg/MANIFEST.tsv"; return 1; }
   done
+}
+ft_copy() {   # the fine-tuned checkpoint copy must still have the recorded hashes
+  [ "$(cd "$FT" && shasum -a 256 ft_config.json rl_agent_config.json tokenizer/tokenizer.json tokenizer/tokenizer_config.json)" = "$FT_SHA" ] \
+    || { echo "$FT differs from the fine-tuned checkpoint's files"; return 1; }
 }
 answers() {   # answers SET FILE: the page's own download, committed (and so pushed, by the HEAD check) before scoring
   [ "$(basename "$2")" = "audit_answers_$1.tsv" ] || { echo "$2: expected the $1 page's download, audit_answers_$1.tsv"; exit 1; }
@@ -48,22 +54,28 @@ answers() {   # answers SET FILE: the page's own download, committed (and so pus
 row() {   # row ANALYSIS FILE SHA: one log line
   printf '%s\t%s\t%s\t%s\t%s\n' "$1" "$(date -u +%FT%TZ)" "$2" "$3" "$(printf '%s' "${REASON:-}" | tr '\t\n' '  ')" >> "$LOG"
 }
-publish() {   # publish MESSAGE: commit the analysis log and outputs, push the branch
+publish() {   # publish MESSAGE: commit only the analysis log and outputs, push the branch
   git add "$LOG" "$OUT"
-  git commit -q -m "$1"
+  if [ -n "$(git ls-files -- "$OUT")$(git ls-tree -r --name-only HEAD -- "$OUT")" ]; then
+    git commit -q -m "$1" -- "$LOG" "$OUT"
+  else   # no output yet: a pathspec matching nothing would make the commit fail
+    git commit -q -m "$1" -- "$LOG"
+  fi
   git push -q origin "HEAD:refs/heads/$(git branch --show-current)"
 }
-run() {   # run ANALYSIS OUTPUT COMMAND...: pushed start row, then the command; a failure is logged and pushed too
-  local a=$1 out=$2; shift 2
-  if [ -e "$out" ]; then
-    [ -n "${REASON:-}" ] || { echo "$out exists; set REASON=... to run again"; exit 1; }
-    mv "$out" "$out.before-$(date -u +%Y%m%dT%H%M%SZ)"
+begin() {   # begin ANALYSIS OUTPUT: a repeat needs a reason, an earlier output is kept, then a pushed start row
+  A=$1
+  if [ -e "$2" ] || awk -F'\t' -v a="$1" '$1 == a && $3 == "start" {f = 1} END {exit !f}' "$LOG"; then
+    [ -n "${REASON:-}" ] || { echo "$1 has run before; set REASON=... to run it again"; exit 1; }
   fi
-  row "$a" start "$(git rev-parse HEAD)"
-  publish "1872 analysis $a start"
+  if [ -e "$2" ]; then mv "$2" "$2.before-$(date -u +%Y%m%dT%H%M%SZ)"; fi
+  row "$1" start "$(git rev-parse HEAD)"
+  publish "1872 analysis $1 start"
+}
+step() {   # step COMMAND...: run it; on failure, a pushed failed row
   if ! "$@"; then
-    row "$a" failed "$(git rev-parse HEAD)"
-    publish "1872 analysis $a failed"
+    row "$A" failed "$(git rev-parse HEAD)"
+    publish "1872 analysis $A failed"
     exit 1
   fi
 }
@@ -79,41 +91,45 @@ case ${1:-} in reprints|ocr|truncation) ;; audit1872|audit1859) [ -f "${2:-}" ] 
   || { echo "not on a branch of the public history (root $PUBLIC_ROOT_SHA), or on main"; exit 1; }
 shasum -a 256 -c --status results/1872/analysis_scripts.sha256 || { echo "scripts differ from results/1872/analysis_scripts.sha256"; exit 1; }
 [ -z "$(git status --porcelain -- bin results/1872 "$STAGES")" ] || { echo "uncommitted changes under bin/ or results/1872"; exit 1; }
-frozen bin/agent_outputs.py
+git diff --cached --quiet || { echo "something is staged: the analysis commits must hold only the log and outputs"; exit 1; }
+frozen bin/agent_outputs.py || exit 1
 git merge-base --is-ancestor HEAD '@{u}' 2> /dev/null || { echo "push this commit first: the push is the public timestamp"; exit 1; }
 mkdir -p "$OUT"
 [ -f "$LOG" ] || printf 'analysis\tutc\tfile\tsha256\treason\n' > "$LOG"
 
+case $1 in audit1872|audit1859) answers "${1#audit}" "$2" ;; esac
+
 case $1 in
 reprints)
-  logged "${INPUTS[@]}" "$D"/window.txt
-  run reprints "$OUT"/reprints.md python3 -I bin/reprints_1872.py "$D" "$D"/window.txt "$OUT"/reprints.md --seed 1872 "${SYS[@]}"
+  begin reprints "$OUT"/reprints.md
+  step logged "${INPUTS[@]}" "$D"/window.txt
+  step python3 -I bin/reprints_1872.py "$D" "$D"/window.txt "$OUT"/reprints.md --seed 1872 "${SYS[@]}"
   record reprints "${SCRIPTS[@]}" bin/reprints_1872.py "${INPUTS[@]}" "$D"/window.txt "$OUT"/reprints.md ;;
 ocr)
-  logged "${INPUTS[@]}" "$D"/window.txt
-  run ocr "$OUT"/ocr_terciles.md python3 -I bin/ocr_terciles_1872.py "$D" "$D"/window.txt "$OUT"/ocr_terciles.md "${SYS[@]}"
+  begin ocr "$OUT"/ocr_terciles.md
+  step logged "${INPUTS[@]}" "$D"/window.txt
+  step python3 -I bin/ocr_terciles_1872.py "$D" "$D"/window.txt "$OUT"/ocr_terciles.md "${SYS[@]}"
   record ocr "${SCRIPTS[@]}" bin/ocr_terciles_1872.py "${INPUTS[@]}" "$D"/window.txt "$OUT"/ocr_terciles.md ;;
 truncation)
-  logged "$D"/ft_input.jsonl
-  [ "$(cd "$FT" && shasum -a 256 ft_config.json rl_agent_config.json tokenizer/tokenizer.json tokenizer/tokenizer_config.json)" = "$FT_SHA" ] \
-    || { echo "$FT differs from the fine-tuned checkpoint's files"; exit 1; }
-  run truncation "$OUT"/truncation.md .venv/bin/python -I bin/truncation_1872.py "$FT" "$FT"/ft_config.json "$D"/ft_input.jsonl \
-    "$OUT"/truncation.md --max-len 4096
+  begin truncation "$OUT"/truncation.md
+  step logged "$D"/ft_input.jsonl
+  step ft_copy
+  step .venv/bin/python -I bin/truncation_1872.py "$FT" "$FT"/ft_config.json "$D"/ft_input.jsonl "$OUT"/truncation.md --max-len 4096
   record truncation bin/run_analyses_1872.sh bin/truncation_1872.py "$FT"/ft_config.json "$FT"/rl_agent_config.json \
     "$FT"/tokenizer/tokenizer.json "$FT"/tokenizer/tokenizer_config.json "$D"/ft_input.jsonl "$OUT"/truncation.md ;;
 audit1872)
-  answers 1872 "$2"
-  logged "${INPUTS[@]}" "$D"/audit/sample_1872.tsv "$D"/audit/page_1872/audit_key.tsv
-  run audit1872 "$OUT"/audit_1872.md python3 -I bin/audit_1872.py storm "$D" "$D"/audit/sample_1872.tsv \
+  begin audit1872 "$OUT"/audit_1872.md
+  step logged "${INPUTS[@]}" "$D"/audit/sample_1872.tsv "$D"/audit/page_1872/audit_key.tsv
+  step python3 -I bin/audit_1872.py storm "$D" "$D"/audit/sample_1872.tsv \
     "$D"/audit/page_1872/audit_key.tsv "$2" "$OUT"/audit_1872.md "${SYS[@]}" --ft "$D"/flags_ft_laya.lines \
     --keyword "$D"/flags_strict.lines --keyword "$D"/flags_fuzzy.lines --base "$D"/flags_base_laya.lines --seed 1872
   record audit1872 "${SCRIPTS[@]}" bin/audit_1872.py "${INPUTS[@]}" "$D"/audit/sample_1872.tsv \
     "$D"/audit/page_1872/audit_key.tsv "$2" "$OUT"/audit_1872.md ;;
 audit1859)
-  answers 1859 "$2"
-  logged "$D"/audit/page_1859/audit_key.tsv
-  frozen results/audit/sample_1859.tsv results/1859-adjudication-opus.tsv
-  run audit1859 "$OUT"/audit_1859.md python3 -I bin/audit_1872.py balanced data results/audit/sample_1859.tsv \
+  begin audit1859 "$OUT"/audit_1859.md
+  step logged "$D"/audit/page_1859/audit_key.tsv
+  step frozen results/audit/sample_1859.tsv results/1859-adjudication-opus.tsv
+  step python3 -I bin/audit_1872.py balanced data results/audit/sample_1859.tsv \
     "$D"/audit/page_1859/audit_key.tsv "$2" "$OUT"/audit_1859.md --adjudication results/1859-adjudication-opus.tsv --seed 1872
   record audit1859 "${SCRIPTS[@]}" bin/audit_1872.py data/labelset/key.tsv data/labels/claude/b*.tsv \
     data/labels/gemma.tsv data/adjudication/manifest.tsv results/1859-adjudication-opus.tsv \
