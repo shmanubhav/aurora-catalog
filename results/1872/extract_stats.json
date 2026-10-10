@@ -1,0 +1,12 @@
+{
+  "scans_year": 74854,
+  "excluded_unparsed": 0,
+  "excluded_no_lccn": 1359,
+  "excluded_in_window": 57,
+  "articles_year": 2066599,
+  "scans_window": 6472,
+  "articles_window": 181014,
+  "chars_median": 516,
+  "chars_p90": 2718,
+  "share_over_2000_chars": 0.143
+}
