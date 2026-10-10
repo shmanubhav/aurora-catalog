@@ -1,0 +1,2 @@
+H 1769  N 5  n 354  weight 4.9972
+pool 933  net sample 354 of 1769  items 1287
