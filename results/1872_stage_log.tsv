@@ -29,3 +29,10 @@ qwen	start	2026-10-10T12:18:08Z	219b290
 qwen	2026-10-10T12:23:50Z	data/1872/checker/qwen_server.txt	59b5d140fee27a4c019670e91fb8bbe11ff16a83f477209f7df99753fdc15b24	1	ef45eae
 qwen	2026-10-10T12:23:50Z	data/1872/checker/qwen.tsv	ff88032a518182f94c7a02aa97059960bfc64a7a676ccf1437b57a240394d845	68	ef45eae
 opus_checker_render	start	2026-10-10T15:14:06Z	e7535bc	
+opus_checker_render	2026-10-10T15:14:07Z	data/1872/checker/opus_batches/b001.txt	e0312c8b25267f74c766a7773562bcc4984573765a36c80cade5fe303516cbca	607	841b512
+opus_checker_render	2026-10-10T15:14:07Z	data/1872/checker/opus_batches/b002.txt	59a28662a313150a51af1a1f0160b82d8a72e882bcb67cbf0a359ab0dfdf4f6c	592	841b512
+opus_checker_render	2026-10-10T15:14:07Z	data/1872/checker/opus_batches/b003.txt	b27e6fdd7060aae6c056b381d8a771b28c36c5ad2f244ff37981aacb1869d93f	87	841b512
+opus_checker_render	2026-10-10T15:14:07Z	SB/checker/_prompts/agent1.md	522785887e2aaadcc6c76a681c2ea38000890fc2c7d377efa88e0a201e770cc7	10	841b512
+opus_checker_render	2026-10-10T15:14:07Z	SB/checker/_prompts/agent2.md	5892e0f395089d3614fc4c8caca1d795808e675f675088cffee282b3988e9105	10	841b512
+opus_checker_render	2026-10-10T15:14:07Z	SB/checker/_prompts/agent3.md	346a57774f2769255926a07a6f1f9bfa6b133a615a0f8021ba1c5d93e8897199	10	841b512
+opus_checker_render	2026-10-10T15:14:07Z	SB/checker/_owners.tsv	8bdd2ca0a42e9cd7984b5dc27e52291ab37f07c55e04b25446e207b3b6cba56d	3	841b512
