@@ -54,7 +54,8 @@ for row in map(json.loads, open(a.inp)):
 # The question header and separators take part of max_len, so the model cuts articles somewhat shorter than max_len.
 out = [f"# Fine-tuned Laya truncation count (max_len {a.max_len}, head_max_len {enc.cfg.get('head_max_len', 192)})\n",
        f"Articles scored: {total}. Truncated (any state token dropped): {len(cut)}. Longer than {a.max_len} tokens: "
-       f"{over}. Longest article: {longest} tokens." + (f" Room left for the article: {room} tokens." if room is not None else "") + "\n"]
+       f"{over}. Longest article: {longest} tokens. (Token counts are of the serialized state, a few tokens more than the "
+       f"article text.)" + (f" Room left for the article: {room} tokens." if room is not None else "") + "\n"]
 out += [f"- line {n}: {t} tokens, {d} dropped" for n, t, d in cut]
 open(a.out, "w").write("\n".join(out) + "\n")
 print("\n".join(out[:2]))

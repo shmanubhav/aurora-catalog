@@ -1,0 +1,10 @@
+# sha256sum on the GPU host (2026-10-10T18:23:19Z), /srv/laya-batch/work/ft:
+e3238ee4b9d5e0378b0ab533cb3660c69af80ffa35f00d4155b519605c83a57e  config.json
+afd200541042bfdd51a6da4821e554b71fb58999a4ece9ef7bb1adf435eb0079  all/rl_agent_config.json
+dbba919c6e5e492bc22beb80abb64e6fcc7e8744dc696e8388b8c977767afa4b  all/tokenizer/tokenizer.json
+e8e6a37c189f9dd23976b86b3e1ddb6928472e9f87c94103a1aaff311f45f090  all/tokenizer/tokenizer_config.json
+# local copy, data/ft_checkpoint_copy:
+e3238ee4b9d5e0378b0ab533cb3660c69af80ffa35f00d4155b519605c83a57e  ft_config.json
+afd200541042bfdd51a6da4821e554b71fb58999a4ece9ef7bb1adf435eb0079  rl_agent_config.json
+dbba919c6e5e492bc22beb80abb64e6fcc7e8744dc696e8388b8c977767afa4b  tokenizer/tokenizer.json
+e8e6a37c189f9dd23976b86b3e1ddb6928472e9f87c94103a1aaff311f45f090  tokenizer/tokenizer_config.json

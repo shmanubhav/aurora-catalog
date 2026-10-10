@@ -119,9 +119,9 @@ printf 'b1\tYES\nb2\tYES\nb3\tNO\nb4\tNO\n' | tee "$d2/labels/claude/b001.tsv" >
 printf 'id\tkind\n' > "$d2/adjudication/manifest.tsv"; : > "$d2/adj.tsv"; : > "$d2/none.lines"
 printf 'id\tstratum\tstratum_size\tdrawn\nb1\tS5\t4\t4\nb2\tS5\t4\t4\nb3\tS5\t4\t4\nb4\tS5\t4\t4\n' > "$d2/sample.tsv"
 printf 'card_id\tsource_id\tis_repeat\nc1\tb1\t0\nc2\tb2\t0\nc3\tb3\t0\nc4\tb4\t0\n' > "$d2/key.tsv"
-printf 'c1\tYES\nc2\tNO\nc3\tNO\nc4\tNO\n' > "$d2/answers.tsv"
+printf 'c1\tYES\nc2\tNO\nc3\tNO\nc4\tNO\n' > "$d2/answers.tsv"; printf '1\n' > "$d2/ft.lines"
 python3 -I bin/audit_1872.py storm "$d2" "$d2/sample.tsv" "$d2/key.tsv" "$d2/answers.tsv" "$d2/out.md" --adjudication "$d2/adj.tsv" \
-  --system ft=lines:"$d2/none.lines" --system strict=lines:"$d2/none.lines" --h1 ft --strict strict \
+  --system ft=lines:"$d2/ft.lines" --system strict=lines:"$d2/none.lines" --h1 ft --strict strict \
   --ft "$d2/none.lines" --keyword "$d2/none.lines" --base "$d2/none.lines" --resamples 300 > /dev/null
 python3 -I - "$d2/out.md" <<'PY' || fail "toy: kappa interval"
 import random, sys
@@ -135,7 +135,17 @@ def kappa(p):
 rng = random.Random(1872)
 ks = sorted(k for k in (kappa([pairs[rng.randrange(4)] for _ in pairs]) for _ in range(300)) if k is not None)
 want = f"| 0.50 ({ks[int(0.025 * len(ks))]:.2f} to {ks[int(0.975 * len(ks)) - 1]:.2f}; {len(ks)} of 300 resamples estimable) |"
-sys.exit(0 if want in open(sys.argv[1]).read() else f"want {want}")
+# The corrected bootstrap has its own random.Random(1872): ft flags b1 only, so H2 = recall(ft) = 2 p1 / (4 (p1 + p0)).
+rng, h2 = random.Random(1872), []
+for _ in range(300):
+    r = [pairs[rng.randrange(4)] for _ in pairs]
+    yes, no = [h for h, m in r if m], [h for h, m in r if not m]
+    p1, p0 = (sum(yes) / len(yes) if yes else 1.0), (sum(no) / len(no) if no else 0.0)
+    h2.append(2 * p1 / (4 * (p1 + p0)) if p1 + p0 else 0.0)
+h2.sort()
+want2 = f"+50.0% (95% audit-sampling interval {h2[7]:+.1%} to {h2[291]:+.1%};"
+text = open(sys.argv[1]).read()
+sys.exit(0 if want in text and want2 in text else f"want {want} and {want2}")
 PY
 echo "audit, hand-computed toy: all expected values present"
 
@@ -168,46 +178,68 @@ sys.exit(0 if len(rows) == 3 and sum(pool) == 1229 and max(pool) - min(pool) <= 
 EOF
 echo "ocr terciles: pool split in thirds, positives add up"
 
-# OCR quality on known strings, and a reprint pair, in the toy: pool qualities 1, 0.75, 0.5, 0.25; net "aa, bb" (0.5,
-# a token with punctuation is not letters) and "" (0). Cut points 0.4167 and 0.8333. Lines 10 and 20 are one reprint.
-python3 -I - "$d" <<'PY'
+# OCR and reprint toys on their own data: pool p1..p5 (weight 1), net n1..n3 (weight 3); final-YES p1 p2 p3 n1.
+# Flags: ft {p1,p2,p3}, strict {p1,p4,p5}. OCR qualities: p1 0.75, p2 0, p3 0.25, p4 0.5, p5 1; n1 "aa," 0 (punctuation
+# is not a letter), n2 "" 0, n3 1. Cut points exactly 0.25 and 0.75, so p3 and p1 check that ties go to the lower tercile.
+# Reprints: p2 and p3 share a text (one group); n3 has p1's text but is net, so it must stay apart. Groups: YES p1,
+# {p2,p3} (weight 1 each) and n1 (3) = 5; strict finds p1 (1/5), strict OR ft finds p1 and {p2,p3} (2/5): H2 +20.0%.
+d3="$t/toy3"; mkdir -p "$d3/labelset" "$d3/labels/claude" "$d3/adjudication"
+printf 'id\tline\tstratum\tweight\np1\t1\tpool\t1\np2\t2\tpool\t1\np3\t3\tpool\t1\np4\t4\tpool\t1\np5\t8\tpool\t1\nn1\t5\tnet\t3\nn2\t6\tnet\t3\nn3\t7\tnet\t3\n' > "$d3/labelset/key.tsv"
+printf 'p1\tYES\np2\tYES\np3\tYES\np4\tNO\np5\tNO\nn1\tYES\nn2\tNO\nn3\tNO\n' | tee "$d3/labels/claude/b001.tsv" > "$d3/labels/gemma.tsv"
+printf 'id\tkind\n' > "$d3/adjudication/manifest.tsv"; : > "$d3/adj.tsv"
+printf '1\n2\n3\n' > "$d3/ft.lines"; printf '1\n4\n8\n' > "$d3/strict.lines"
+python3 -I - "$d3" <<'PY'
 import sys
-lines = ["x"] * 60
-for n, txt in {10: "aa bb cc dd", 20: "aa bb cc 1d", 30: "aa bb 1c 1d", 40: "aa 1b 1c 1d", 50: "aa, bb", 60: ""}.items():
-    lines[n - 1] = txt
-open(f"{sys.argv[1]}/window_ocr.txt", "w").write("\n".join(lines) + "\n")
-same = "the aurora borealis was seen here last night by many people in town"
-for n, txt in {10: same, 20: same, 30: "cotton prices fell sharply in the new orleans market this week",
-               40: "the steamer arrived late from memphis with a heavy cargo today",
-               50: "a brilliant light appeared in the northern sky after dark on monday",
-               60: "the council met to discuss the new bridge over the river"}.items():
-    lines[n - 1] = txt
-open(f"{sys.argv[1]}/window_rep.txt", "w").write("\n".join(lines) + "\n")
+a = "the aurora borealis was seen here last night by many people in town"
+b = "a brilliant light appeared in the northern sky after dark on monday evening"
+rep = [a, b, b, "cotton prices fell sharply in the new orleans market this week", "the steamer arrived late from memphis with cargo",
+       "the council met to discuss the new bridge over the river", a, "letters from the west report heavy snow on the plains"]
+ocr = ["aa bb cc 1d", "1a 1b 1c 1d", "aa 1b 1c 1d", "aa bb 1c 1d", "aa,", "", "aa bb", "aa bb cc dd"]
+open(f"{sys.argv[1]}/window_rep.txt", "w").write("\n".join(rep) + "\n")
+open(f"{sys.argv[1]}/window_ocr.txt", "w").write("\n".join(ocr) + "\n")
 PY
-python3 -I bin/ocr_terciles_1872.py "$d" "$d/window_ocr.txt" "$d/ocr.md" --adjudication "$d/adj.tsv" --system ft=lines:"$d/ft.lines" > /dev/null
-for want in 'pool articles: 0.4167 and 0.8333.' '| low | 1 + 1 |' '| mid | 2 + 1 |' '| high | 1 + 0 |'; do
-  grep -qF -- "$want" "$d/ocr.md" || { cat "$d/ocr.md"; fail "ocr toy: $want"; }
+python3 -I bin/ocr_terciles_1872.py "$d3" "$d3/window_ocr.txt" "$d3/ocr.md" --adjudication "$d3/adj.tsv" --system ft=lines:"$d3/ft.lines" > /dev/null
+for want in 'pool articles: 0.2500 and 0.7500.' '| low | 2 + 2 |' '| mid | 2 + 0 |' '| high | 1 + 1 |'; do
+  grep -qF -- "$want" "$d3/ocr.md" || { cat "$d3/ocr.md"; fail "ocr toy: $want"; }
 done
-python3 -I bin/reprints_1872.py "$d" "$d/window_rep.txt" "$d/rep.md" --seed 1 --resamples 50 --adjudication "$d/adj.tsv" \
-  --system ft=lines:"$d/ft.lines" --system strict=lines:"$d/strict.lines" --system fuzzy=lines:"$d/strict.lines" \
+python3 -I bin/reprints_1872.py "$d3" "$d3/window_rep.txt" "$d3/rep.md" --seed 1 --resamples 50 --adjudication "$d3/adj.tsv" \
+  --system ft=lines:"$d3/ft.lines" --system strict=lines:"$d3/strict.lines" --system fuzzy=lines:"$d3/strict.lines" \
   --h1 ft --strict strict --fuzzy fuzzy > /dev/null
-for want in 'Labeled items: 6 in 5 groups (pool 3, net 2); groups with more than one article: 1, largest 2.' \
-            '| ft | 1 | 1 | 100.0% | 16.7% |' \
-            'the 1 final-YES articles it flags that strict missed fall in 1 distinct reprint groups; final-YES groups it flags with no strict-matched member: 0'; do
-  grep -qF -- "$want" "$d/rep.md" || { cat "$d/rep.md"; fail "reprint toy: $want"; }
+for want in 'Labeled items: 8 in 7 groups (pool 4, net 3); groups with more than one article: 1, largest 2.' \
+            '| ft | 2 | 2 | 100.0% | 40.0% |' \
+            'the 2 final-YES articles it flags that strict missed fall in 1 distinct reprint groups; final-YES groups it flags with no strict-matched member: 1'; do
+  grep -qF -- "$want" "$d3/rep.md" || { cat "$d3/rep.md"; fail "reprint toy: $want"; }
 done
-echo "ocr and reprint toys: known qualities, cut points and one merged reprint pair"
+# The group bootstrap, recomputed independently: groups in key order of their first member, resampled within pool and net.
+python3 -I - "$d3/rep.md" <<'PY' || fail "reprint toy: group bootstrap"
+import random, sys
+pool = [(1, 1, 1, 1), (1, 1, 1, 0), (1, 0, 0, 1), (1, 0, 0, 1)]   # (weight, final-YES, ft, strict): p1, {p2,p3}, p4, p5
+net = [(3, 1, 0, 0), (3, 0, 0, 0), (3, 0, 0, 0)]                  # n1, n2, n3
+def rec(s, pred):
+    pos = sum(w for w, y, _, _ in s if y)
+    return sum(w for w, y, f, k in s if y and pred(f, k)) / pos if pos else 0.0
+rng, v = random.Random(1), []
+for _ in range(50):
+    s = [rng.choice(pool) for _ in pool] + [rng.choice(net) for _ in net]
+    v.append(rec(s, lambda f, k: f or k) - rec(s, lambda f, k: k))
+v.sort()
+want = f"(strict OR h1) - strict: +20.0% (95% bootstrap {v[1]:+.1%} to {v[47]:+.1%})"
+sys.exit(0 if want in open(sys.argv[1]).read() else f"want {want}")
+PY
+echo "ocr and reprint toys: exact cut points with ties, a reprint pair, pool and net kept apart, group bootstrap"
 
 # 6. Truncation counter (needs the laya venv and a copy of the fine-tuned tokenizer and config in data/ft_checkpoint_copy).
 if [ -x .venv/bin/python ] && [ -d data/ft_checkpoint_copy ]; then
   python3 -I -c 'import json
-rows = [" ".join(["aurora"] * 3000), "the sky was red", "", "northern lights seen", "cotton prices"]
+rows = [" ".join(["aurora"] * 3000), "the sky was red", "", " ".join(["aurora"] * 470), " ".join(["aurora"] * 455)]
 for n, s in enumerate(rows, 1):
     print(json.dumps({"id": f"L{n}", "line": n, "state": s}))' > "$t/trunc.jsonl"
   .venv/bin/python -I bin/truncation_1872.py data/ft_checkpoint_copy data/ft_checkpoint_copy/ft_config.json "$t/trunc.jsonl" "$t/trunc.md" --max-len 512 > /dev/null
-  grep -qF "Articles scored: 5. Truncated (any state token dropped): 1." "$t/trunc.md" || { cat "$t/trunc.md"; fail "truncation"; }
-  grep -qF -- "- line 1:" "$t/trunc.md" || fail "truncation line"
-  echo "truncation counter: the one over-long article is counted"
+  # 470 words = 475 state tokens: cut (room 465 after the question header) but not longer than 512; 455 words fit.
+  grep -qF "Articles scored: 5. Truncated (any state token dropped): 2. Longer than 512 tokens: 1." "$t/trunc.md" || { cat "$t/trunc.md"; fail "truncation"; }
+  grep -qF "Room left for the article: 465 tokens." "$t/trunc.md" || fail "truncation room"
+  grep -qF -- "- line 4: 475 tokens, 10 dropped" "$t/trunc.md" || fail "truncation line"
+  echo "truncation counter: cut articles and over-long articles counted separately"
 else
   echo "truncation counter: skipped (no laya venv or tokenizer copy)"
 fi

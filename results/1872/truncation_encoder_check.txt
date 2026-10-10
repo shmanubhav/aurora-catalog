@@ -1,0 +1,3 @@
+# 2026-10-10T18:23:28Z, laya 0.4.1, base Laya 7b928d82 on the M6, 1859 data:
+max_len 256: real [3196, 2492, 2573, 2458, 2239, 2221]... stand-in [3196, 2492, 2573, 2458, 2239, 2221]... identical: True, truncated 30/30
+max_len 1024: real [2428, 1724, 1805, 1690, 1471, 1453]... stand-in [2428, 1724, 1805, 1690, 1471, 1453]... identical: True, truncated 30/30
