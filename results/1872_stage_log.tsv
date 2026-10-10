@@ -40,3 +40,5 @@ opus_checker_run	start	2026-10-10T15:14:09Z	a53c166
 opus_checker_run	2026-10-10T15:14:29Z	SB/checker/agents.tsv	252a693a23b6743a9e7421e1f020717f4e538b0566e2b4e54421573b00f4ab59	3	d2d57bf
 opus_checker_run	2026-10-10T15:14:29Z	SB/checker/_verified.tsv	4ca13ecec4db24febf067fb1df9d117f9f41cc7858972b02e4d5be9f60a5ef93	3	d2d57bf
 opus_checker_collect	start	2026-10-10T15:14:31Z	24087fe	
+opus_checker_collect	2026-10-10T15:14:32Z	data/1872/checker/opus.tsv	65af8d327068a2a82e0879cbe137b53eb97376dedbbdab29c54d46af4164b156	68	cd05b29
+opus_checker_collect	2026-10-10T15:14:32Z	data/1872/checker_failed_ids.txt	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	0	cd05b29
