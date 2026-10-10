@@ -1,0 +1,166 @@
+{
+ "freeze": "2-A4 (1872 run config)",
+ "date_utc": "2026-10-10",
+ "when": "before any 1872 article was downloaded, scored or read",
+ "seed": 1872,
+ "dataset": {
+  "repo": "dell-research-harvard/AmericanStories",
+  "revision": "77e27fa69c4788dfaad1c9efd8a226d5a32d3e9a",
+  "archive": "faro_1872.tar.gz",
+  "archive_sha256": "8b246fb4894f5ce54ed841e3f66dbbcb832b378551ca51f4ba23af75d9087f67",
+  "archive_bytes": 2310675564,
+  "note": "the 1859 archive used in development (faro_1859.tar.gz, sha256 3f15312a...) matches the same revision"
+ },
+ "window": [
+  "1872-02-01",
+  "1872-03-03"
+ ],
+ "window_rule": "publication date = the YYYY-MM-DD prefix of the scan filename as parsed by bin/extract_window.py, inclusive; scans that fail to parse as JSON or lack lccn are excluded and counted; no deduplication beyond the dataset's article segmentation",
+ "systems": {
+  "strict_rg": "freeze/strict.rg via bin/rg_flags.sh",
+  "fuzzy_rg": "freeze/fuzzy.rg via bin/rg_flags.sh",
+  "base_laya": {
+   "checkpoint": "convaiinnovations/laya",
+   "revision": "7b928d828b7b0e022f929d9bd2e44165aa270148",
+   "cutoff": 0.5,
+   "device": "mps (M6)",
+   "script": "bin/laya_score.py",
+   "batch_size": 64,
+   "block": 256,
+   "precision_rule": "the 1859 MPS rule: fp32 below laya mps_amp_min_rows rows per call, autocast at or above",
+   "order": "scored once, in bin/extract_window.py article order",
+   "revision_note": "the revision 1859 actually loaded (Hugging Face main, lastModified 2026-10-03, the only snapshot in the M6 cache); laya 0.4.1 does not pin by default, so freeze/config.json (1859) named no revision and the earlier draft wrongly cited the reviewed SHA 55cf4c4e. 1872 enforces it with LAYA_REVISION and HF_HUB_OFFLINE=1",
+   "long_articles": "articles over short_max_tokens (300) are scored with predict_long windows, as in 1859 (bin/laya_score.py with freeze/config.json for questions and short_max_tokens)",
+   "verified": "2026-10-10 UTC: with LAYA_REVISION=7b928d82..., HF_HUB_OFFLINE=1 and bin/laya_score.py on the M6, the first 512 articles of the 1859 window scored identically (to 4 decimals) to the 1859 run",
+   "sha256": {
+    "config.json": "7add7c041b53f7091e65908553af79ab3f077946e5f2312d510ae13b17c7c134",
+    "encoder/config.json": "bf3ab80598fdccf414855a2ce80f22859e4492d06ca8a62ddd1cfb63972f8979",
+    "model.safetensors": "891102d372688fc2a094dac56a384bc537b87c63f21f9f3dac0be2b7cbc8d86c",
+    "rl_agent_config.json": "ae287b56bbcf5f8c4f4541ae9dfd00c914c4c48b940b8398c3058af37ba92bbd",
+    "tokenizer/tokenizer_config.json": "50044de60daaa73df97d262e15a40d4faf0160e7d742df64b377877a1320dd12",
+    "tokenizer/tokenizer.json": "6c8aaa9a542084f2457eab775d4eeb51f92a70c0fd9de28d5edb0ddec3c08d30"
+   },
+   "integrity": "laya verifies every listed file against these SHA-256 digests (LAYA_SHA256_DIGESTS) before any weight is parsed; a mismatch aborts the stage"
+  },
+  "ft_laya": {
+   "checkpoint": "/srv/laya-batch/work/ft/all on llm02 (model.safetensors sha256 687f84e722a8fc7584d5f763308d8315986ce5b7e42b30e04a655f153e57ab70)",
+   "cutoff": 0.8,
+   "script": "bin/ft_score.py",
+   "max_len": 4096,
+   "batch": 16,
+   "amp": "fp16 (LAYA_CUDA_AMP in the laya-batch compose template)",
+   "image": "laya-batch:e974cca5eb42 on llm02, image ID sha256:7db9c7e879c57e8e530fc5504577aa6b2a274198b44b9b5a4ebae5169760b58f (laya 0.4.1, torch 2.14.1+rocm7.2)",
+   "integrity": "bin/run_1872.sh checks the checkpoint's model.safetensors SHA-256 on llm02 and the image ID before scoring"
+  },
+  "flag_rule": "a system flags an article when its score as written to 4 decimals is >= its cutoff, or its rg pattern matches; fine-tuned Laya keeps the first 4,096 tokens of a longer article (right truncation) and such articles are counted; base Laya windows long articles as in 1859"
+ },
+ "pool": {
+  "definition": "union of the articles flagged by strict_rg, fuzzy_rg, base_laya and ft_laya",
+  "cap": null,
+  "cap_rule": "no cap: every pooled article is labeled"
+ },
+ "loose_net": {
+  "pattern": "freeze/loose.rg via bin/rg_flags.sh, run over articles outside the pool",
+  "target_sample": 400,
+  "n_rule": "H = loose-net hits outside the pool; N = max(5, ceil(H / 400)); n = max(1, round(H / N)) articles with Python round() (half to even) when H > 0, and no net stratum when H = 0; drawn by simple random sampling without replacement with random.Random(1872); each sampled article weighs H / n",
+  "commit_before_labeling": "H, N and n (results/1872/labelset_draw.txt) and key.tsv (line numbers and weights, no text) are committed under results/1872 before any labeling starts"
+ },
+ "labelers": {
+  "sonnet": {
+   "role": "first labeler, every item",
+   "harness": "bin/run_agents.py: claude -p --model claude-sonnet-5-5 (full ID), isolated as in labelers.sandbox",
+   "prompt": "freeze/labeler_agent_prompt.md",
+   "batching": "bin/make_batches.py at 60000 chars (as in 1859)",
+   "parse": "id<TAB>YES|NO per line, validated by bin/check_labels.py"
+  },
+  "gemma": {
+   "role": "second labeler, every item",
+   "model": "gemma4:26b-a4b-it-mtp-q4_K_M",
+   "digest": "08ae7ec1744bd7f451c4a530afb39d2673ad9d07a8369b8a33a3613b41212a68",
+   "server": "the same gateway as 1859 (its private URL is a local setting, local.env), a LiteLLM gateway that moved to a Kubernetes cluster after the 1859 run and is still backed by Ollama 0.34.4 (rocm) on the GPU host; OpenAI-compatible chat completions; client key read from the macOS keychain into LLM_KEY only",
+   "script": "bin/label_gemma.py",
+   "settings": "temperature 0, GEMMA_MAX_TOKENS 4096, GEMMA_CONTEXT 131072, GEMMA_WORKERS 1",
+   "parse": "first YES/NO word in the reply; a length stop with no answer is UNPARSED and goes to adjudication",
+   "drift_check": "done 2026-10-10 UTC on 20 random 1859 items (random.Random(1872)): 18/20 match the 1859 Gemma labels on both the gateway path and direct Ollama (same 2 borderline items flip: a0690 NO->YES, a0198 YES->NO); two runs on one path agree 20/20. Disclosed as a measured run-to-run difference; Gemma disagreements go to adjudication either way"
+  },
+  "opus_adjudicator": {
+   "role": "settles every Sonnet/Gemma disagreement, every Gemma UNPARSED, and 30 random agreements (random.Random(1872))",
+   "harness": "bin/run_agents.py: claude -p --model claude-opus-5-5 (full ID), isolated as in labelers.sandbox",
+   "prompt": "freeze/adjudicator_prompt.md",
+   "blind": "article text and prompt only, never either labeler's answer",
+   "final_label": "the adjudicator's call where it adjudicated, the consensus label elsewhere; agreed-check overturns are reported and trigger no relabeling",
+   "batching": "bin/make_batches.py at 45000 chars, from the manifest order (as in 1859)"
+  },
+  "sandbox": "each agent is a fresh headless Claude Code run (claude -p, Claude Code 2.1.296, auto-update off) started in its own sandbox directory outside the repository that holds only its own batch files and prompt, launched exactly as bin/agent_outputs.agent_cmd and agent_env: --restricted (user/project/local settings, plugins and hooks ignored; file tools confined to the directory; settings files writable only by a person), --strict-mcp-config, --tools Read,Write, --permission-mode acceptEdits, --no-session-persistence, the full model ID with --model; an allowlisted environment (PATH HOME USER LOGNAME TMPDIR LANG TERM) plus CLAUDE_CODE_DISABLE_AUTO_MEMORY=1, CLAUDE_CODE_DISABLE_CLAUDE_MDS=1, DISABLE_AUTOUPDATER=1, and the runner refuses to start if a proxy or model-override variable is set; the resolved model and permission denials are logged per run; verified before registration by bin/smoke_agents.py (results/agent_smoke_test.md)",
+  "no_switching": "no role changes model, build, host or settings after its first 1872 item; a resolved model other than the pinned full ID aborts the stage (bin/run_agents.py); if a pinned model becomes unavailable, that role restarts from its first item on a replacement named in a dated amendment",
+  "collection": "bin/run_agents.py keeps an answer only from a run whose log shows exactly the pinned model and records it with its SHA-256 in SANDBOX/_verified.tsv; bin/collect_agents.py accepts a batch only from its owning agent's folder, only if that hash matches, and only if the shared validator (bin/agent_outputs.py: one line per id in order, exact column count, YES/NO) passes; anything else is a failed batch"
+ },
+ "checker_arms": "freeze/checker_arms.json",
+ "failures": "an agent whose output fails validation is re-run with a fresh agent, up to three attempts per stage run; earlier attempts are kept, an agent's first complete answers for a batch stand, and accepted answers are attested with their SHA-256; if any agent is still not done, the stage stops unlogged (bin/run_agents.py exit 3) and is re-run with ATTEMPT and REASON; a re-run restarts only agents that still owe a batch and accepts answers only for batches without an attested answer; the third (MAX_STAGE_RUNS) and any later run of an agent stage (opus_checker_run, label_run, adjudication_run) is final, and a run after the third happens only if the third stopped before finishing and is listed as a deviation; on a final run whatever is still missing goes to these rules: a Sonnet batch gets MISSING labels and goes to adjudication (kind sonnet-missing); an item whose Sonnet label is MISSING and whose adjudication is unanswered is excluded from every system and listed; a missing or UNPARSED checker verdict counts as kept; an unanswered adjudication item keeps the Sonnet label and is listed; fine-tuned scoring is re-run from the start if it fails; any re-run of a started stage needs a stated reason and keeps the earlier outputs (bin/run_1872.sh)",
+ "human_audit": {
+  "who": "an independent annotator recruited by the author (not the author, not an LLM); fallback: if nobody is found within 4 weeks of the 1872 labels being final, the author does it",
+  "size": {
+   "1872": 250,
+   "1859": 100
+  },
+  "design": "1872: the labeled items are partitioned by priority into exactly one stratum each: S1 ft AND keyword (strict or fuzzy); S2 ft and no keyword; S3 keyword and no ft; S4 base Laya only; S5 loose-net sample. Each stratum first gets min(25, size); the rest of the 250 is allocated proportionally to (size - first share) by largest remainder; draw by random.Random(1872) within stratum (bin/draw_audit.py). 1859: 50 final-YES and 50 final-NO drawn separately with random.Random(1872)",
+  "procedure": "two blind pages (bin/make_audit_page.py --set 1872 with freeze/labeler_prompt_1872.md, --set 1859 with freeze/labeler_prompt.md): article text and the frozen prompt verbatim only, no highlighting, no labels, strata or scores in the page source; 10 hidden repeats per page; partial completion: all completed items are used, and a stratum under 80% complete is reported as incomplete; an author-fallback audit is disclosed as not blind to the key",
+  "reporting": "Cohen's kappa and raw agreement per stratum with 95% intervals; H1 and H2 recomputed with human labels substituted, as a sensitivity analysis; the LLM key decides H1 and is described as an LLM-adjudicated key",
+  "estimator": "per stratum: raw agreement (Wilson interval), Cohen's kappa, positive and negative agreement, and p1_s = share of audited LLM-YES items the human calls YES, p0_s = same for LLM-NO items; a quantity with no audited items is not estimable and its LLM label stands. Corrected H1/H2 (sensitivity): every labeled item gets y_i = p1_s or p0_s by its LLM label (net items weigh H/n); precision_k = sum over flagged of w*y / sum over flagged of w; recall_k = sum over flagged of w*y / sum over all of w*y; 2,000 bootstrap resamples of audited items within stratum, seed 1872, percentile intervals; H1's unmatched-sighting condition stays on the LLM key",
+  "samples": "1859: results/audit/sample_1859.tsv and items_1859.jsonl, drawn and committed before any 1872 download, and redrawn byte-identically by the frozen bin/draw_audit.py (sha256 efd1b9d99057e7bf23d8fe3e6609d67094baaeab06bee9b7965cf3d064102f02); 1872: drawn by bin/run_1872.sh audit and committed under results/1872"
+ },
+ "analysis": {
+  "script": "bin/score_1872.py (validated before any 1872 download by reproducing the 1859 results)",
+  "bootstrap": {
+   "resamples": 2000,
+   "seed": 1872,
+   "strata": "pool and loose-net resampled separately",
+   "zero_positive_resamples": "counted, not dropped",
+   "intervals": "percentile"
+  },
+  "unit": "the article; sensitivity analysis groups pool and net articles into reprint groups (shingle_words 5, max_shingle_df 20, reprint_containment 0.5, as Freeze 1) and repeats H1 and H2 with a cluster bootstrap",
+  "dates": "all dates UTC",
+  "zero_positive_resamples": "counted, with recall 0",
+  "post_download_code_rule": "code written after download is allowed only if it is a pure function of committed stage outputs, serves a sensitivity or exploratory analysis whose choices are pinned in the pre-registration, is named in section 7, and is committed and hashed before it touches any 1872 output"
+ },
+ "drift_checks": {
+  "gemma": "done 2026-10-10 UTC on 20 random 1859 items (random.Random(1872)): 18/20 match the 1859 Gemma labels on both the gateway path and direct Ollama (same 2 borderline items flip: a0690 NO->YES, a0198 YES->NO); two runs on one path agree 20/20. Disclosed as a measured run-to-run difference; Gemma disagreements go to adjudication either way",
+  "qwen_checker": "done 2026-10-10 UTC on 20 random flagged 1859 items: 20/20 match the 1859 checker run (data/finetune/drift_qwen_items.jsonl)"
+ },
+ "agreed_spotcheck": 30,
+ "hypotheses": {
+  "H1": "primary (Freeze 1 bar), point estimates, unrounded values",
+  "H2": "confirmatory secondary: recall(strict OR ft) - recall(strict), supported if the 95% paired stratified bootstrap lower bound > 0",
+  "H2_prime": "secondary, not confirmatory: same with (strict OR fuzzy) as the baseline",
+  "H3": "descriptive"
+ },
+ "run": "every stage runs through bin/run_1872.sh STAGE with literal settings; agent prompts are rendered into ~/scratch/aurora-1872-sandbox by bin/render_agent_prompts.py; results/1872_stage_log.tsv records each output's SHA-256 and is committed after every stage",
+ "amendments": [
+  {
+   "date": "2026-10-10",
+   "what": "2-A3: base Laya revision corrected to 7b928d82 (verified 512/512), stage runner, audit partition, failure rules, glowing-sky count dropped",
+   "commit": "private development history"
+  },
+  {
+   "date": "2026-10-10",
+   "what": "integrity from content: LAYA_SHA256_DIGESTS for base Laya, weights hash for fine-tuned Laya",
+   "commit": "private development history"
+  },
+  {
+   "date": "2026-10-10",
+   "what": "2-A4: agents run isolated (headless claude -p per directory, settings and MCP off, Read/Write only, full model IDs), remote file hashes checked before fine-tuned scoring, Ollama and Claude Code pins checked, stage order and re-run rules enforced, failure rules executable, checker items keyed by label-set id, audit estimator formula, 1859 audit sample committed"
+  },
+  {
+   "date": "2026-10-10",
+   "what": "commit security reviews: answers from unverifiable runs never collected; one shared validator; collection only of checksum-verified answers"
+  },
+  {
+   "date": "2026-10-10",
+   "what": "2-A5 (review round 4): agents launched with --restricted and an allowlisted environment (auto memory and CLAUDE.md off, proxy variables refused), verified by bin/smoke_agents.py; stage re-runs resume from attested answers; agent stages run at most 3 times, then failures go to the failure rules; check accepts MISSING; one strict label reader everywhere; stage log on branch run-1872 with a published start row per stage; results to results/1872/results.md"
+  },
+  {
+   "date": "2026-10-10",
+   "what": "2-A6 (review round 5): agent stages resume after an interrupted run; Claude Code version checked before a stage's start row; caffeinate on agent stages; run-cap wording; an excluded MISSING item is not also listed as Sonnet-label-kept"
+  }
+ ]
+}

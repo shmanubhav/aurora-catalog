@@ -1,0 +1,100 @@
+{
+ "seed": 1872,
+ "adjudication": "results/1859-adjudication-opus.tsv",
+ "presumed_no_train": 3000,
+ "presumed_no_gate": 5000,
+ "shingle_words": 5,
+ "max_shingle_df": 20,
+ "reprint_containment": 0.5,
+ "folds": 5,
+ "base_checkpoint": "convaiinnovations/laya-multilingual",
+ "max_len": 4096,
+ "head_max_len": 256,
+ "token_lengths_note": "mmBERT tokenizer over rows + gate (9,454 docs): max 3220, p99 1795, median 172; 772 exceed 1024, 0 exceed 4096",
+ "base_revision": "e4e9ddf21a7b1903b7acffd8814ad4307bf63a67",
+ "base_snapshot_llm02": "/cache/hf/hub/models--convaiinnovations--laya-multilingual/snapshots/e4e9ddf21a7b1903b7acffd8814ad4307bf63a67",
+ "recipe": {
+  "epochs": 4,
+  "micro_batch": 8,
+  "grad_accum": 8,
+  "encoder_lr": 2.5e-05,
+  "head_lr": 0.0001,
+  "loss": "rlcd",
+  "label_smoothing": 0.0,
+  "seed": 1872,
+  "max_len": 4096,
+  "head_max_len": 256,
+  "device": "cuda",
+  "note": "laya 0.4.1 train_cli defaults; the pilot (300 rows, 1 epoch) peaked at 19.2 GB with one allocator OOM-retry from the fp32 calibration pass (batch 16), not the training batches, so defaults stand"
+ },
+ "inference": {
+  "script": "bin/ft_score.py",
+  "max_len": 4096,
+  "batch": 16,
+  "amp": "fp16 (LAYA_CUDA_AMP)"
+ },
+ "gate": {
+  "min_precision": 0.8,
+  "min_recall": 0.8,
+  "cutoff_grid": [
+   0.05,
+   0.1,
+   0.15,
+   0.2,
+   0.25,
+   0.3,
+   0.35,
+   0.4,
+   0.45,
+   0.5,
+   0.55,
+   0.6,
+   0.65,
+   0.7,
+   0.75,
+   0.8,
+   0.85,
+   0.9,
+   0.95
+  ],
+  "cutoff_rule": "argmax out-of-fold F1, ties to the higher cutoff",
+  "unlabeled_stratum": 150389,
+  "gate_size": 4910,
+  "precision": "TP_w / (flags_w + r * unlabeled_stratum); r = gate-sample flag rate of the all-data model",
+  "recall": "TP_w / P_w over pool (weight 1) + net sample (weight 5); positives outside pool + net unobserved",
+  "caveat": "out-of-fold numbers are optimistic (same storm, pre-selected articles); passing earns the 1872 test only"
+ },
+ "fuzzy_rg": {
+  "file": "freeze/fuzzy.rg",
+  "generator": "bin/make_fuzzy_rg.py",
+  "note": "v2: shape confusions only; v1 (vowel swaps, spaces between letters) matched 4,915 1859 articles, mostly 'entere(d)', so it was narrowed on unlabeled-text match counts before any labels; v2 matches 599 (strict 584); 1859 numbers are in-sample"
+ },
+ "window_1872": [
+  "1872-02-01",
+  "1872-03-03"
+ ],
+ "answer_key_1872": "pool = fine-tuned Laya (t*) + base Laya (0.5, M6 precision rule) + strict rg + fuzzy rg; loose net = freeze/loose.rg, 1-in-N sample with N committed after counting; labelers = Claude Sonnet batches + Gemma gemma4:26b-a4b-it-mtp-q4_K_M via the gateway (temperature 0, loops UNPARSED to adjudication) + blind Claude Opus adjudication of all disagreements plus 30 agreed checks",
+ "pass_bar_1872": "precision >= 0.80 AND weighted recall >= 0.80 AND at least one sighting strict rg missed",
+ "fold_rows": {
+  "0": 910,
+  "1": 910,
+  "2": 907,
+  "3": 917,
+  "4": 900,
+  "note": "training rows per fold; prep_stats.json fold_sizes also count 90 gate articles that share a reprint group with training rows (those are excluded from the gate)"
+ },
+ "amendments": [
+  {
+   "date": "2026-10-09",
+   "when": "after the first cv0 launch crashed, before any CV training or results",
+   "what": "training runs through bin/ft_train.py: laya.train_cli unchanged except the fp32 calibration passes score 2 articles per batch instead of 16, and PYTORCH_HIP_ALLOC_CONF=expandable_segments:True",
+   "why": "cv0 failed at its pre-training calibration pass (363 items, fp32, batch 16, max_len 4096): HIPBLAS_STATUS_ALLOC_FAILED after 3.3-4.5 GB allocation failures at 23.2 GB peak; the recipe (optimizer, batch 8x8, epochs, LRs, loss, seed) is unchanged"
+  },
+  {
+   "date": "2026-10-10",
+   "when": "before any 1872 article was downloaded, scored or read",
+   "what": "the 1872 answer key and both checker arms use freeze/labeler_prompt_1872.md, identical to freeze/labeler_prompt.md except line 1 (print dates 1 February to 3 March 1872); checker arms are frozen in freeze/checker_arms.json",
+   "why": "Freeze 1 named the 1872 labelers but not their prompt; the 1859 prompt's first line names the wrong months"
+  }
+ ]
+}

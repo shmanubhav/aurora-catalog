@@ -1,0 +1,44 @@
+{
+ "freeze": 2,
+ "date": "2026-10-10",
+ "when": "after the out-of-fold gate was computed, before any 1872 article was scored or read",
+ "gate": {
+  "cutoff": 0.8,
+  "precision": 0.9194,
+  "recall": 0.8701,
+  "f1": 0.894,
+  "tp_w": 308.0,
+  "flags_w": 335.0,
+  "positives_w": 354.0,
+  "gate_flags": 0,
+  "extrapolated_false_alarms": 0,
+  "pass": true,
+  "computed_by": "python -I bin/gate_metrics.py freeze/finetune.json data results/finetune/oof.tsv results/finetune/gate_scores.tsv results/finetune/gate_result.json"
+ },
+ "t_star": 0.8,
+ "all_data_model": {
+  "llm02_path": "/srv/laya-batch/work/ft/all",
+  "sha256": {
+   "model.safetensors": "687f84e722a8fc7584d5f763308d8315986ce5b7e42b30e04a655f153e57ab70",
+   "rl_agent_config.json": "afd200541042bfdd51a6da4821e554b71fb58999a4ece9ef7bb1adf435eb0079",
+   "questions.json": "300ce0aa7f2caf72e1c3ef2572ba02038f63836a1776c423b9aed76215b001c5"
+  },
+  "trained": "2026-10-10 02:29-02:45 UTC, 1002 s, rows.jsonl (4544 rows), recipe and seed as Freeze 1"
+ },
+ "score_files_sha256": {
+  "results/finetune/oof.tsv": "e8cb2f0b86f4f9f5b2f3a5e608af066d70b4d1a3f9a49523c4bde590f482ae32",
+  "results/finetune/gate_scores.tsv": "8d56a0dc7eb2088e82cda177b8bb3b57480aa0a8bb1ef70131fece6a1a4401a1"
+ },
+ "runs": "cv0-cv3 on 2026-10-09; cv4 re-run 2026-10-10 02:15 UTC after the fold 4 thermal stop (llm02 fan curve added in between, infra-ansible PR #93); same recipe, seed and data",
+ "note": "out-of-fold numbers are optimistic (same storm, pre-selected articles); the pass earns the 1872 test, which uses t_star and this checkpoint unchanged",
+ "evidence": {
+  "gate_disjoint": "the 4,910 gate lines share no line with the 3,000 presumed-NO training rows or the 1,544 labeled rows",
+  "inference_precision": "fp16: LAYA_CUDA_AMP=fp16 in the laya-batch compose template, same for the folds, the gate and the 1872 run",
+  "score_ranges": "OOF labeled YES median 0.984; labeled NO median 0.013 (max 0.988); OOF presumed-NO max 0.034; gate max 0.011",
+  "intervals": {
+   "labeled_precision_unweighted": "304/327 = 93.0% (Wilson 95% 89.7-95.3%)",
+   "weighted_recall": "87.0% (stratified bootstrap 95% 82.8-90.9%, 2000 resamples, seed from freeze/config.json)",
+   "zero_false_alarm_bound": "rule of three: gate alone 0/4,910 -> <=92 extrapolated false alarms -> precision >=72.2%; gate plus OOF presumed-NO 0/7,910 -> <=57 -> precision >=78.6% (95% upper bounds; the frozen formula uses the point estimate)"
+  }
+ }
+}

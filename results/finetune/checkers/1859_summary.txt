@@ -1,0 +1,21 @@
+cutoff 0.8: 327 flagged labeled articles, 23 false alarms; 29 of them were adjudicated by Opus
+
+laya alone     kept 327  precision 91.9% (unweighted 304/327, Wilson 89.7%-95.3%)  recall 87.0%  F1 0.894  removed: 0 false alarms, 0 true sightings
+opus           kept 306  precision 99.0% (unweighted 303/306, Wilson 97.2%-99.7%)  recall 86.7%  F1 0.925  removed: 20 false alarms, 1 true sightings
+    on the 298 flags Opus never adjudicated: removed 15/16 false alarms, rejected 0/282 true sightings
+    true sightings it rejected: a0963
+    false alarms it kept: a0134, a0149, a0801
+haiku          kept 302  precision 98.4% (unweighted 297/302, Wilson 96.2%-99.3%)  recall 85.0%  F1 0.912  removed: 18 false alarms, 7 true sightings
+    on the 298 flags Opus never adjudicated: removed 15/16 false alarms, rejected 2/282 true sightings
+    true sightings it rejected: a0338, a0518, a0806, a0925, a1226, a1396, a1497
+    false alarms it kept: a0134, a0149, a0150, a0260, a0509
+qwen-think     kept 296  precision 99.7% (unweighted 295/296, Wilson 98.1%-99.9%)  recall 84.5%  F1 0.914  removed: 22 false alarms, 9 true sightings
+    on the 298 flags Opus never adjudicated: removed 16/16 false alarms, rejected 5/282 true sightings
+    true sightings it rejected: a0094, a0338, a0595, a0695, a0994, a1223, a1226, a1377, a1497
+    false alarms it kept: a0149
+qwen-direct    kept 281  precision 99.3% (unweighted 279/281, Wilson 97.4%-99.8%)  recall 79.9%  F1 0.886  removed: 21 false alarms, 25 true sightings
+    on the 298 flags Opus never adjudicated: removed 16/16 false alarms, rejected 14/282 true sightings
+    true sightings it rejected: a0085, a0094, a0177, a0192, a0308, a0338, a0595, a0606, a0690, a0695, a0708, a0806, a0884, a0925, a0963, a0994, a1111, a1223, a1226, a1239, a1339, a1377, a1454, a1497, a1513
+    false alarms it kept: a0149, a0509
+
+weighted positives 354; recall is over all labeled positives (Laya misses count against every arm)

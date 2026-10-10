@@ -1,0 +1,18 @@
+{
+  "window": ["1859-08-28", "1859-09-30"],
+  "laya_package": "laya==0.4.1",
+  "laya_checkpoint": "convaiinnovations/laya",
+  "laya_questions": {
+    "aurora": {
+      "type": "noul",
+      "instructions": "Does this article report that an aurora, the northern lights, or a glowing night sky was seen somewhere?"
+    }
+  },
+  "cutoff": 0.5,
+  "routing": "articles of at most 300 tokens go through predict_batch; longer ones through predict_long (noul = max over windows)",
+  "short_max_tokens": 300,
+  "seed": 1859,
+  "agreed_spotcheck": 30,
+  "loose_sample_rate_n": 5,
+  "pool_cap": 1229
+}

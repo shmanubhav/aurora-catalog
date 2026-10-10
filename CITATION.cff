@@ -1,0 +1,15 @@
+cff-version: 1.2.0
+message: "If you use this software, data or method, please cite it as below."
+title: "Machine reading of aurora sighting reports in historical US newspapers"
+authors:
+  - family-names: Sharma
+    given-names: Anubhav
+license: MIT
+date-released: 2026-10-10
+keywords:
+  - aurora
+  - geomagnetic storms
+  - space weather
+  - historical newspapers
+  - text classification
+  - pre-registration
