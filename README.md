@@ -21,8 +21,8 @@ scans.
   1859 and 1872 audit samples
 - `data/` the 1859 labels, label-set key, article text, base Laya scores and keyword flags (on `analysis-1872`)
 - `prereg/` the pre-registration and its manifest
-- `paper/` the AI-use ledger and its addendum, the post-download analysis disclosures, the 1859 diagnostic scripts in
-  `paper/scripts/`, and instructions for the human auditor
+- `paper/` the AI-use ledger and its addendum, the post-download analysis disclosures, the 1859 diagnostic scripts and the
+  audit-error simulation in `paper/scripts/`, and instructions for the human auditor
 
 ## Reproducing
 
@@ -42,8 +42,7 @@ written after the run, checked by `bin/test_analyses_1872.sh` on 1859 data and t
 before they touch any 1872 output. Each then runs once through `bin/run_analyses_1872.sh`, which checks every input
 against the stage log and records the hashes in `results/1872/analysis_log.tsv`.
 
-Freeze records mention the author's machines: `llm02` is the GPU host (AMD RX 7900 XTX), `M6` the Apple-silicon
-workstation; `/srv` and `/opt` paths are on the GPU host.
+Some file and record names contain `llm02` or `m6`; they refer to the author's GPU server and workstation.
 
 ## Use of AI
 

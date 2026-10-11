@@ -1,0 +1,47 @@
+# Simulated annotator error through the registered audit correction (1859, not pre-registered)
+
+Command: python3 -I paper/scripts/audit_error_sim_1859.py WORKDIR
+
+SHA-256 of the code and inputs:
+
+- `paper/scripts/audit_error_sim_1859.py` 4843744a76a716f49f74ad51eed946c7dcb69faf02f4a8df3d331e5fd4295d0e
+- `bin/audit_1872.py` a9f653271bcba7a606f6eb9aa7a6bfd757854e5193c8e7d9fa0f446c2b405016
+- `bin/draw_audit.py` efd1b9d99057e7bf23d8fe3e6609d67094baaeab06bee9b7965cf3d064102f02
+- `bin/make_audit_page.py` 6edb05e69317604df3492264327c82e9b24421053068168559ed099d6d167be9
+- `bin/holdout_data.py` 8f7ab146785cea2f7930e4fd547892819ef8aae17741b084c081ff8f119b0757
+- `bin/agent_outputs.py` 83135daab9008e362b4b80218d725b8049bf311da133f4ccc978278d5b68f599
+- `freeze/labeler_prompt.md` 33346ee7a430760000a3f242ceda8bbc0ceeaa99296e27e30b9df99a442ebb2b
+- `results/1859-adjudication-opus.tsv` 562780733136207965b9d11e887629d1be05fc97f66cfb9737abbf8b28ba4561
+- `data/labelset/key.tsv` d8f852d486a0f34cfcd476afb31dc1b216a7d5213b4257385a05b014563db79d
+- `data/labelset/items.jsonl` af163c60032e0da1a5128b17b6c9b981366a358c69ea48380147dc5e62a798ed
+- `data/labels/gemma.tsv` 84174f026423b719e6a01a64aef934130cdcf7173acd400b69d24223989041ab
+- `data/adjudication/manifest.tsv` 33b90c9c45427aad3fadf4db936f3f15a3047c618770b9e77f2ba355524d6f4d
+- `data/laya_scores.tsv` d22dd4dbd08af7f07adfcedf780ace03e239ee959873e396a2f1f503ff6b8c49
+- `data/rg_strict.lines` 4195922a9cf5ea3df502433c161b332e120f4c4cdd73a8ae56f40ff6cd9ba4b8
+- `data/rg_fuzzy.lines` b1ee9f25c2571cfea8e97a07ab8f774e4431164528e589135917b08dc95e1b26
+- `results/finetune/oof.tsv` e8cb2f0b86f4f9f5b2f3a5e608af066d70b4d1a3f9a49523c4bde590f482ae32
+- `data/labels/claude/b*.tsv` (78 files, concatenated in name order) 0e6da88c55ee20f6a7f6fa9bfdc6dcdc46dbda7d6b40179b2a720cb59330bea3
+
+Storm-style sample, drawn / stratum size: S1 52/310, S2 15/15, S3 49/277, S4 82/627, S5 52/315.
+Cards on the page: 260 (10 hidden repeats). The scorer runs with --resamples 20; the point estimates read here do not depend on it.
+
+LLM key: ft_laya precision 91.9%, weighted recall 87.0%; strict recall 91.0%; H2 gain +5.4%. The no-flip run through bin/audit_1872.py printed the same four numbers (checked to the printed digit), the same H1 verdict, and agreement on every repeat pair.
+
+The AI review's run (8% both ways, seed 7): ft_laya recall 53.7% (it reported 53.7%), precision 84.9%, H2 gain +3.6%.
+
+Median and 2.5-97.5 percentile range over 200 seeds of the audit-corrected point estimates:
+
+| Annotator error | Rate | ft_laya precision | ft_laya recall | strict recall | H2 gain | H1 passes | All repeat pairs agree |
+|---|---|---|---|---|---|---|---|
+| both ways | 1% | 91.9% (88.4% to 92.2%) | 83.4% (74.0% to 87.0%) | 88.9% (77.4% to 91.2%) | +5.2% (+4.5% to +5.6%) | 136 of 200 | 163 of 200 |
+| both ways | 2% | 90.2% (86.3% to 92.3%) | 77.2% (66.0% to 86.1%) | 82.2% (70.9% to 91.0%) | +4.8% (+4.2% to +5.5%) | 62 of 200 | 135 of 200 |
+| both ways | 4% | 88.5% (84.6% to 93.3%) | 68.1% (55.3% to 80.8%) | 73.2% (59.0% to 87.9%) | +4.3% (+3.5% to +5.2%) | 7 of 200 | 90 of 200 |
+| both ways | 8% | 85.1% (77.4% to 90.8%) | 55.2% (42.3% to 69.9%) | 61.5% (46.6% to 75.9%) | +3.6% (+2.7% to +4.6%) | 0 of 200 | 36 of 200 |
+| false YES only (on key-NO items) | 1% | 91.9% (91.9% to 92.2%) | 83.8% (74.4% to 87.0%) | 89.1% (77.7% to 91.1%) | +5.2% (+4.6% to +5.5%) | 145 of 200 | 169 of 200 |
+| false YES only (on key-NO items) | 2% | 92.0% (91.9% to 93.9%) | 77.5% (66.3% to 85.6%) | 82.5% (71.6% to 91.1%) | +4.8% (+4.1% to +5.4%) | 71 of 200 | 148 of 200 |
+| false YES only (on key-NO items) | 4% | 92.0% (91.9% to 94.0%) | 68.7% (55.9% to 80.8%) | 73.9% (59.9% to 87.6%) | +4.3% (+3.5% to +5.1%) | 10 of 200 | 111 of 200 |
+| false YES only (on key-NO items) | 8% | 92.1% (92.0% to 94.4%) | 56.7% (44.4% to 71.2%) | 62.8% (48.8% to 76.9%) | +3.6% (+2.9% to +4.4%) | 0 of 200 | 54 of 200 |
+| false NO only (on key-YES items) | 1% | 91.9% (88.4% to 91.9%) | 87.0% (86.6% to 88.1%) | 91.0% (90.7% to 91.2%) | +5.4% (+5.1% to +5.5%) | 200 of 200 | 192 of 200 |
+| false NO only (on key-YES items) | 2% | 90.2% (86.0% to 91.9%) | 86.8% (86.3% to 88.1%) | 90.8% (90.4% to 91.2%) | +5.4% (+5.1% to +5.7%) | 200 of 200 | 184 of 200 |
+| false NO only (on key-YES items) | 4% | 88.4% (84.6% to 91.9%) | 86.7% (86.0% to 88.1%) | 90.8% (90.3% to 91.2%) | +5.4% (+5.0% to +5.8%) | 198 of 200 | 167 of 200 |
+| false NO only (on key-YES items) | 8% | 84.8% (77.2% to 89.9%) | 86.6% (85.2% to 88.7%) | 90.6% (89.8% to 91.3%) | +5.5% (+4.8% to +6.0%) | 184 of 200 | 135 of 200 |

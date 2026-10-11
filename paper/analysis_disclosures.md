@@ -115,6 +115,9 @@ Record of what happened (dated; filled in as it happens):
   base-Laya scoring ran as registered ("as in 1859"); only its description was imprecise: the pre-registration
   (section 3) and the frozen configs (`freeze/config.json`, `freeze/config_1872.json`) describe the long route as
   scored in windows, but long-route articles whose serialized state fits 464 tokens were read in one pass.
+- **Audit-error simulation (2026-10-11 UTC; not pre-registered).** Written and run on 1859 data only, to replace an AI
+  review's single uncommitted run with a committed script, and pushed before any audit page is sent. See "Sensitivity
+  of the registered audit correction to annotator error" below.
 
 ## Choices where the registration left room
 
@@ -162,14 +165,40 @@ Record of what happened (dated; filled in as it happens):
    - A corrected H2' is not computed: the registration names the audit-corrected H1 and H2.
    - The answers file must be the page's own download and be committed and pushed before it is scored.
 
-## Known weakness of the registered audit correction
+## Sensitivity of the registered audit correction to annotator error
 
 The audit-corrected recall is very sensitive to annotator error on items the LLM key calls NO. Each audited stratum's
 p0 (the share of LLM-NO items the human calls YES) is applied to every LLM-NO item in that stratum, and the
 base-Laya-only stratum and the loose-net stratum (weight H/n) hold most of the labeled items. A few human false alarms
-there therefore add many phantom sightings to the denominator, and they look exactly like LLM misses. In a simulation
-the AI referee ran on the 1859 sample (not committed; to be redone with a committed script before the paper quotes a
-number), flipping 8% of answers at random moved fine-tuned Laya's recall from 87.0% (LLM key) to 53.7%
-(audit-corrected). This comes from the registered estimator, not from the code. The paper reports the corrected
-numbers as a sensitivity analysis next to the test-retest agreement on the hidden repeats, which measures the
-annotator's own consistency. As registered, the LLM key decides H1.
+there therefore add many spurious sightings to the denominator, and they look exactly like LLM misses. The effect
+follows from the registered estimator; the code implements it as registered.
+
+A simulation measures the effect (`paper/scripts/audit_error_sim_1859.py`, output beside it). It is not
+pre-registered. It reads 1859 data only, so section 7's limit on code written after the download (which concerns 1872
+outputs) does not apply, and it is pushed before any audit page is sent (the push time is on GitHub; see "GitHub
+server times" above for the limits of GitHub's public record). It takes the LLM key as correct and flips a simulated
+annotator's answers at random, at the same rate in every stratum and independently of the article (real errors are
+probably more frequent on borderline articles). Each answers file is scored by the unmodified `bin/audit_1872.py` (the
+hashed version in `results/1872/analysis_scripts.sha256`), the code that will score the real answers. The registered
+1859 audit sample (50 YES, 50 NO) gets no corrected H1/H2, so the simulation draws its own 1859 sample of 250 by the
+1872 rules (pre-registration section 5). With no flips, the scorer prints the LLM-key numbers (fine-tuned Laya recall
+87.0%). Over 200 seeds, the median corrected recall is:
+
+- 83.4% with 1% of answers flipped both ways (2.5-97.5 percentile range 74.0% to 87.0%);
+- 77.2% with 2% flipped (66.0% to 86.1%);
+- 68.1% with 4% flipped (55.3% to 80.8%);
+- 55.2% with 8% flipped (42.3% to 69.9%).
+
+Flipping answers only on items the key calls NO moves recall almost as much (8%: 56.7%). Flipping answers only on
+items it calls YES barely moves recall (8%: 86.6%) but lowers precision (8%: 84.8%, from 91.9%). So the recall drop
+comes from false YES answers on key-NO items, as described above. An AI review (Claude Opus) earlier ran a single,
+uncommitted simulation (8% both ways, seed 7) and reported a recall of 53.7%; that run is one of the 200 here and
+gives the same 53.7%. 1872 has far fewer sightings than 1859 (59 weighted sightings, against 354) for about as many
+articles the key calls NO, so the same annotator error rate would be expected to move the 1872 corrected recall more
+than it moves these 1859 numbers (1872 was not simulated).
+
+The paper reports the corrected numbers as a sensitivity analysis next to the test-retest agreement on the hidden
+repeats, which measures the annotator's own consistency. That check has limited power: in the simulation, 135 of 200
+simulated annotators with 2% of answers flipped agreed with themselves on all 10 pairs, and it cannot detect an error
+the annotator repeats. Per-stratum agreement and kappa are reported as registered (pre-registration section 5). As
+registered, the LLM key decides H1.
