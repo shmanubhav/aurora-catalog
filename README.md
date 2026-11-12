@@ -34,8 +34,8 @@ Order for the 1872 test: the registered commit is pushed and cited on OSF first;
 and run the stages in order, starting with `bin/run_1872.sh download`. Stages commit and push only `run-1872`, so the
 registered commit never changes.
 
-Freeze records mention the author's machines: `llm02` is the GPU host (AMD RX 7900 XTX), `M6` the Apple-silicon
-workstation; `/srv` and `/opt` paths are on the GPU host.
+Freeze records refer to two of the author's machines by host name: a GPU host (AMD RX 7900 XTX, 24 GB) and an
+Apple-silicon workstation; `/srv` and `/opt` paths are on the GPU host.
 
 ## Use of AI
 
